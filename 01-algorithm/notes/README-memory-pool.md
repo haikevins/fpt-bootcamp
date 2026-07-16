@@ -20,7 +20,7 @@
 12. [Memory Pool và Heap](#12-memory-pool-và-heap)
 13. [Độ phức tạp](#13-độ-phức-tạp)
 14. [Ưu điểm và hạn chế](#14-ưu-điểm-và-hạn-chế)
-15. [Lỗi thường gặp](#15-lỗi-thường-gặp)
+15. [Các lỗi thường gặp](#15-các-lỗi-thường-gặp)
 16. [Hướng mở rộng](#16-hướng-mở-rộng)
 17. [Tổng kết](#17-tổng-kết)
 18. [Tài liệu tham khảo](#18-tài-liệu-tham-khảo)
