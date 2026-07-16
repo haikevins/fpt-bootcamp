@@ -2065,11 +2065,5 @@ Các điểm quan trọng:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
-- Programiz — **Breadth First Search**
-- Chủ đề liên quan: Graph, Queue và Adjacency List.
-
-Trang nguồn:
-
-<https://www.programiz.com/dsa/graph-bfs>
-
-README không phải là bản sao nguyên văn của nội dung nguồn.
+- Programiz — **Breadth First Search**:  
+  https://www.programiz.com/dsa/graph-bfs
