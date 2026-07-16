@@ -1,6 +1,12 @@
 # Data Structures — Ring Buffer và ứng dụng
 
-> Tài liệu này trình bày lại kiến thức về Ring Buffer theo cách độc lập, dùng cho mục đích học tập và thực hành lập trình nhúng.
+> Tài liệu học tập độc lập về **Ring Buffer**, dùng cho mục đích học tập và thực hành lập trình nhúng.
+
+---
+
+
+
+---
 
 ## 1. Ring Buffer là gì?
 
@@ -884,7 +890,7 @@ Khi triển khai trong firmware thực tế, cần xác định rõ:
 
 ## Tài liệu tham khảo
 
-Nội dung được biên soạn độc lập dựa trên chủ đề Ring Buffer và tham khảo bài viết:
+README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
 - EPCB — **Data Structures - Ring buffer và ứng dụng**:  
   https://epcb.vn/blogs/ak-embedded-software/data-structures-ring-buffer-va-ung-dung

@@ -1,6 +1,6 @@
 # Data Structures — Danh sách liên kết đơn (Singly Linked List)
 
-> Tài liệu học tập độc lập về Linked List, được tổng hợp theo hướng dễ áp dụng trong C và lập trình nhúng.
+> Tài liệu học tập độc lập về **Linked List**, được tổng hợp theo hướng dễ áp dụng trong C và lập trình nhúng.
 
 ---
 
