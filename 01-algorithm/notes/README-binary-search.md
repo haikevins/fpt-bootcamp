@@ -29,7 +29,7 @@
 21. [Binary Search với số thực](#21-binary-search-với-số-thực)
 22. [Ứng dụng](#22-ứng-dụng)
 23. [Binary Search trong lập trình nhúng](#23-binary-search-trong-lập-trình-nhúng)
-24. [Lỗi thường gặp](#24-lỗi-thường-gặp)
+24. [Các lỗi thường gặp](#24-các-lỗi-thường-gặp)
 25. [Bài tập luyện tập](#25-bài-tập-luyện-tập)
 26. [Tổng kết](#26-tổng-kết)
 27. [Tài liệu tham khảo](#27-tài-liệu-tham-khảo)
@@ -1602,7 +1602,7 @@ O(log n)
 
 ---
 
-## 24. Lỗi thường gặp
+## 24. Các lỗi thường gặp
 
 ## 24.1. Dùng Binary Search trên mảng chưa sắp xếp
 
