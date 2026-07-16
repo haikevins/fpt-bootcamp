@@ -1908,10 +1908,5 @@ Các điểm cần nhớ:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
-- Programiz — **Depth First Search (DFS)**
-
-Trang nguồn:
-
-<https://www.programiz.com/dsa/graph-dfs>
-
-README không phải là bản sao nguyên văn của nội dung nguồn.
+- Programiz — **Depth First Search (DFS)**:  
+  https://www.programiz.com/dsa/graph-dfs
