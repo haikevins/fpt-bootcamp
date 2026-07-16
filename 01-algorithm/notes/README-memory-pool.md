@@ -1,6 +1,6 @@
 # Data Structures — Memory Pool và ứng dụng
 
-> Tài liệu này trình bày độc lập về **Memory Pool** theo hướng thực hành bằng ngôn ngữ C và ứng dụng trong phần mềm nhúng.
+> Tài liệu học tập độc lập về **Memory Pool** theo hướng thực hành bằng ngôn ngữ C và ứng dụng trong phần mềm nhúng.
 
 ---
 
