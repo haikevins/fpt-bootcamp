@@ -2170,6 +2170,5 @@ Các điểm quan trọng:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
-- Programiz — **Dijkstra's Algorithm**
-
-README không phải là bản sao nguyên văn của nội dung nguồn.
+- Programiz — **Dijkstra's Algorithm**:  
+  https://www.programiz.com/dsa/dijkstra-algorithm
