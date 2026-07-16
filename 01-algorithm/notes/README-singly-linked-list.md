@@ -18,7 +18,7 @@
 10. [Độ phức tạp](#10-độ-phức-tạp)
 11. [Ứng dụng của Linked List](#11-ứng-dụng-của-linked-list)
 12. [Linked List trong lập trình nhúng](#12-linked-list-trong-lập-trình-nhúng)
-13. [Lỗi thường gặp](#13-lỗi-thường-gặp)
+13. [Các lỗi thường gặp](#13-các-lỗi-thường-gặp)
 14. [Bài tập luyện tập](#14-bài-tập-luyện-tập)
 15. [Tổng kết](#15-tổng-kết)
 16. [Tài liệu tham khảo](#16-tài-liệu-tham-khảo)
@@ -1446,7 +1446,7 @@ Không xác định rõ ownership dễ gây memory leak hoặc double free.
 
 ---
 
-## 13. Lỗi thường gặp
+## 13. Các lỗi thường gặp
 
 ## 13.1. Không kiểm tra kết quả `malloc()`
 
