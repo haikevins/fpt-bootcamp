@@ -1794,7 +1794,7 @@ Kích thước thực tế có thể lớn hơn do alignment.
 
 ---
 
-## 15. Lỗi thường gặp
+## 15. Các lỗi thường gặp
 
 ## 15.1. Dereference khi Pool rỗng
 
