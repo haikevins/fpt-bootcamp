@@ -1927,11 +1927,5 @@ Các biến thể cần nắm:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
-- GeeksforGeeks — **Binary Search**
-- GeeksforGeeks — các bài liên quan đến độ phức tạp, first/last occurrence, rotated array, unbounded search và binary search problems.
-
-Trang chủ đề:
-
-<https://www.geeksforgeeks.org/dsa/binary-search/>
-
-README không phải là bản sao nguyên văn của nội dung nguồn.
+- GeeksforGeeks — **Binary Search**:  
+  https://www.geeksforgeeks.org/dsa/binary-search/>
