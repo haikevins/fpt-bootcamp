@@ -2268,12 +2268,5 @@ Trong embedded:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
-- GeeksforGeeks — **Heap Data Structure**
-- GeeksforGeeks — **Binary Heap**
-- GeeksforGeeks — **Applications of Heap Data Structure**
-
-Trang chủ đề:
-
-<https://www.geeksforgeeks.org/dsa/heap-data-structure/>
-
-README không phải là bản sao nguyên văn của nội dung nguồn.
+- GeeksforGeeks — **Heap Data Structure**:  
+  https://www.geeksforgeeks.org/dsa/heap-data-structure/
