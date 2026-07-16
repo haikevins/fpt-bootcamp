@@ -1682,7 +1682,7 @@ Trong embedded, Linked List nên được sử dụng cùng với:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên chủ đề được trình bày trong bài:
 
-- EPCB — **Data Structures - Danh sách liên kết đơn (Linked List)**:
+- EPCB — **Data Structures - Danh sách liên kết đơn (Linked List)**:  
   https://epcb.vn/blogs/ak-embedded-software/data-structures-danh-sach-lien-ket-don-linked-list
-- GeeksforGeeks — **Linked List Data Structure**:
+- GeeksforGeeks — **Linked List Data Structure**:  
   https://www.geeksforgeeks.org/dsa/linked-list-data-structure/
