@@ -4,7 +4,34 @@
 
 ---
 
+## Mục lục
 
+1. [Ring Buffer là gì?](#1-ring-buffer-là-gì)
+2. [Các cách hiện thực Ring Buffer](#2-các-cách-hiện-thực-ring-buffer)
+3. [Các thành phần chính](#3-các-thành-phần-chính)
+4. [Trạng thái của Ring Buffer](#4-trạng-thái-của-ring-buffer)
+5. [Cơ chế quay vòng](#5-cơ-chế-quay-vòng)
+6. [Minh họa quá trình thêm dữ liệu](#6-minh-họa-quá-trình-thêm-dữ-liệu)
+7. [Minh họa quá trình lấy dữ liệu](#7-minh-họa-quá-trình-lấy-dữ-liệu)
+8. [Khi Ring Buffer đầy](#8-khi-ring-buffer-đầy)
+9. [Cài đặt Ring Buffer cho kiểu `char`](#9-cài-đặt-ring-buffer-cho-kiểu-char)
+   - [File `ring_buffer.h`](#91-file-ring_bufferh)
+   - [File `ring_buffer.c`](#92-file-ring_bufferc)
+10. [Ví dụ sử dụng](#10-ví-dụ-sử-dụng)
+11. [Ứng dụng với UART RX](#11-ứng-dụng-với-uart-rx)
+12. [Ứng dụng tạo command line](#12-ứng-dụng-tạo-command-line)
+13. [Ứng dụng lọc trung bình ADC](#13-ứng-dụng-lọc-trung-bình-adc)
+14. [Chính sách khi đầy](#14-chính-sách-khi-đầy)
+15. [Phân biệt `head == tail`](#15-phân-biệt-head--tail)
+16. [Độ phức tạp](#16-độ-phức-tạp)
+17. [Những lưu ý trong hệ thống nhúng](#17-những-lưu-ý-trong-hệ-thống-nhúng)
+   - [Truy cập từ interrupt và `main()`](#171-truy-cập-từ-interrupt-và-main)
+   - [Kích thước buffer](#172-kích-thước-buffer)
+   - [Dùng kích thước là lũy thừa của 2](#173-dùng-kích-thước-là-lũy-thừa-của-2)
+18. [Ưu điểm](#18-ưu-điểm)
+19. [Hạn chế](#19-hạn-chế)
+20. [Tổng kết](#20-tổng-kết)
+21. [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
