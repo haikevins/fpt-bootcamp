@@ -2499,13 +2499,5 @@ Dữ liệu không vừa RAM       → External Merge Sort
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
-- GeeksforGeeks — **Sorting Algorithms**
-- GeeksforGeeks — **Introduction to Sorting**
-- GeeksforGeeks — **Applications of Sorting**
-- GeeksforGeeks — các bài riêng về Selection Sort, Bubble Sort, Insertion Sort, Merge Sort, Quick Sort, Heap Sort, Counting Sort, Radix Sort và Bucket Sort.
-
-Trang chủ đề:
-
-<https://www.geeksforgeeks.org/dsa/sorting-algorithms/>
-
-README không phải là bản sao nguyên văn của nội dung nguồn.
+- GeeksforGeeks — **Sorting Algorithms**:  
+  https://www.geeksforgeeks.org/dsa/sorting-algorithms/
