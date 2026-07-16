@@ -2191,5 +2191,5 @@ Khi thiết kế cần chú ý:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên chủ đề được trình bày trong bài:
 
-- EPCB — **Data Structures - Memory Pool và ứng dụng**
+- EPCB — **Data Structures - Memory Pool và ứng dụng**:
   https://epcb.vn/blogs/ak-embedded-software/pool-memory-va-ung-dung
