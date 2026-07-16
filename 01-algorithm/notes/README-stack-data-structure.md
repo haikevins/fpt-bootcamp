@@ -1753,5 +1753,5 @@ Trong embedded:
 
 README này được biên soạn và diễn đạt lại độc lập dựa trên chủ đề được trình bày trong:
 
-- GeeksforGeeks — **Stack Data Structure**:
+- GeeksforGeeks — **Stack Data Structure**:  
   https://www.geeksforgeeks.org/dsa/stack-data-structure/
