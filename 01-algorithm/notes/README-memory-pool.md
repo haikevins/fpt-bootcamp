@@ -1,454 +1,408 @@
-# Memory Pool trong C và lập trình nhúng
+# Data Structures — Memory Pool và ứng dụng
 
-Memory Pool là kỹ thuật quản lý bộ nhớ trong đó một vùng nhớ có kích thước xác định được chuẩn bị trước, chia thành nhiều block và tái sử dụng trong suốt thời gian chạy của chương trình.
+> Tài liệu này trình bày độc lập về **Memory Pool** theo hướng thực hành bằng ngôn ngữ C và ứng dụng trong phần mềm nhúng.
 
-Thay vì gọi `malloc()` mỗi khi cần tạo một Message, Event, Packet hoặc Buffer, chương trình lấy một block đang rảnh từ Pool. Khi dùng xong, block được trả lại Pool để phục vụ lần cấp phát tiếp theo.
+---
+
+## Mục lục
+
+1. [Đặt vấn đề](#1-đặt-vấn-đề)
+2. [Memory Pool là gì?](#2-memory-pool-là-gì)
+3. [Cấu trúc của Memory Pool](#3-cấu-trúc-của-memory-pool)
+4. [Nguyên lý hoạt động](#4-nguyên-lý-hoạt-động)
+5. [Thiết kế Memory Pool](#5-thiết-kế-memory-pool)
+6. [Cài đặt bằng C](#6-cài-đặt-bằng-c)
+7. [Ví dụ sử dụng](#7-ví-dụ-sử-dụng)
+8. [Phân tích mã nguồn](#8-phân-tích-mã-nguồn)
+9. [Ứng dụng trong hệ thống nhúng](#9-ứng-dụng-trong-hệ-thống-nhúng)
+10. [Critical Section và truy cập đồng thời](#10-critical-section-và-truy-cập-đồng-thời)
+11. [Giám sát Memory Pool](#11-giám-sát-memory-pool)
+12. [Memory Pool và Heap](#12-memory-pool-và-heap)
+13. [Độ phức tạp](#13-độ-phức-tạp)
+14. [Ưu điểm và hạn chế](#14-ưu-điểm-và-hạn-chế)
+15. [Lỗi thường gặp](#15-lỗi-thường-gặp)
+16. [Hướng mở rộng](#16-hướng-mở-rộng)
+17. [Tổng kết](#17-tổng-kết)
+18. [Tài liệu tham khảo](#18-tài-liệu-tham-khảo)
+
+---
+
+## 1. Đặt vấn đề
+
+Trong quá trình chương trình hoạt động, hệ thống thường cần tạo và hủy các đối tượng tạm thời như:
+
+- Message.
+- Event.
+- Packet.
+- Buffer.
+- Command.
+- Connection.
+- Control block.
+- Cấu trúc dữ liệu của ứng dụng.
+
+Cách thông thường trong C là cấp phát trên Heap:
+
+```c
+void *object = malloc(object_size);
+
+/* Use object. */
+
+free(object);
+```
+
+Cách này linh hoạt nhưng trong phần mềm nhúng và hệ thống thời gian thực có thể phát sinh một số vấn đề:
+
+- Thời gian cấp phát và giải phóng không hoàn toàn cố định.
+- Heap có thể bị phân mảnh sau nhiều lần cấp phát và giải phóng.
+- Khó dự đoán chính xác lượng bộ nhớ còn lại.
+- Có nguy cơ memory leak, double free và use-after-free.
+- `malloc()` có thể không phù hợp để gọi trong Interrupt Service Routine.
+- Hệ thống có thể thất bại tại thời điểm chạy do Heap không còn vùng nhớ phù hợp.
+
+Một giải pháp thường được sử dụng là chuẩn bị sẵn một vùng nhớ cố định và tái sử dụng các phần tử bên trong vùng nhớ đó.
+
+Giải pháp này được gọi là **Memory Pool**.
+
+---
+
+## 2. Memory Pool là gì?
+
+**Memory Pool** là một kỹ thuật quản lý bộ nhớ trong đó một vùng nhớ được cấp phát trước và chia thành nhiều phần tử có kích thước xác định.
+
+Mỗi phần tử có thể được gọi là:
+
+- Block.
+- Chunk.
+- Object.
+- Package.
+- Node.
+- Slot.
+
+Khi chương trình cần một đối tượng:
 
 ```text
-Khởi tạo:
+Memory Pool cấp một block đang trống
+```
 
+Khi chương trình dùng xong:
+
+```text
+Block được trả lại Memory Pool
+```
+
+Block không bị hủy khỏi RAM mà được tái sử dụng trong những lần cấp phát sau.
+
+### Mô hình tổng quát
+
+```text
++-------------------------------------------------------+
+|                    MEMORY POOL                        |
++------------+------------+------------+----------------+
+|  Block 0   |  Block 1   |  Block 2   |    Block N     |
++------------+------------+------------+----------------+
+```
+
+Memory Pool thường có:
+
+- Số block cố định.
+- Kích thước mỗi block cố định.
+- Một cấu trúc theo dõi block nào đang trống.
+- API để cấp phát và thu hồi block.
+
+---
+
+## 3. Cấu trúc của Memory Pool
+
+Một cách cài đặt phổ biến là sử dụng:
+
+```text
+Static Array + Singly Linked List
+```
+
+Mảng tĩnh chứa toàn bộ block:
+
+```c
+static PoolBlock pool_storage[POOL_CAPACITY];
+```
+
+Các block chưa được sử dụng được nối thành một **free list**.
+
+```text
 free_list
     |
     v
 +---------+    +---------+    +---------+    +---------+
 | Block 0 | -> | Block 1 | -> | Block 2 | -> | Block 3 | -> NULL
 +---------+    +---------+    +---------+    +---------+
-
-Sau hai lần cấp phát:
-
-Allocated: Block 0, Block 1
-
-free_list
-    |
-    v
-+---------+    +---------+
-| Block 2 | -> | Block 3 | -> NULL
-+---------+    +---------+
-
-Sau khi trả Block 0:
-
-free_list
-    |
-    v
-+---------+    +---------+    +---------+
-| Block 0 | -> | Block 2 | -> | Block 3 | -> NULL
-+---------+    +---------+    +---------+
 ```
 
-Memory Pool đặc biệt phù hợp với firmware, hệ thống Event-Driven và RTOS vì thời gian cấp phát có thể dự đoán, dung lượng tối đa được biết trước và không xảy ra phân mảnh ngoài bên trong Pool có kích thước block cố định.
-
----
-
-## Mục lục
-
-1. [Vấn đề của Heap trong hệ thống nhúng](#1-vấn-đề-của-heap-trong-hệ-thống-nhúng)
-2. [Memory Pool là gì?](#2-memory-pool-là-gì)
-3. [Cấu trúc của Fixed-Block Memory Pool](#3-cấu-trúc-của-fixed-block-memory-pool)
-4. [Cơ chế hoạt động](#4-cơ-chế-hoạt-động)
-5. [Độ phức tạp và đặc tính bộ nhớ](#5-độ-phức-tạp-và-đặc-tính-bộ-nhớ)
-6. [Thiết kế API](#6-thiết-kế-api)
-7. [Mã nguồn hoàn chỉnh](#7-mã-nguồn-hoàn-chỉnh)
-8. [Ví dụ sử dụng cơ bản](#8-ví-dụ-sử-dụng-cơ-bản)
-9. [Ứng dụng Event Pool](#9-ứng-dụng-event-pool)
-10. [Ứng dụng Packet Buffer Pool](#10-ứng-dụng-packet-buffer-pool)
-11. [Memory Pool cho Linked List](#11-memory-pool-cho-linked-list)
-12. [Sử dụng với Interrupt và RTOS](#12-sử-dụng-với-interrupt-và-rtos)
-13. [Alignment và kích thước block](#13-alignment-và-kích-thước-block)
-14. [Fragmentation](#14-fragmentation)
-15. [Các lỗi thường gặp](#15-các-lỗi-thường-gặp)
-16. [Giám sát và kiểm thử](#16-giám-sát-và-kiểm-thử)
-17. [Các biến thể của Memory Pool](#17-các-biến-thể-của-memory-pool)
-18. [Khi nào nên và không nên dùng](#18-khi-nào-nên-và-không-nên-dùng)
-19. [Cấu trúc repository đề xuất](#19-cấu-trúc-repository-đề-xuất)
-20. [Tóm tắt](#20-tóm-tắt)
-
----
-
-## 1. Vấn đề của Heap trong hệ thống nhúng
-
-Trong C, bộ nhớ động thường được cấp phát và giải phóng bằng:
+Mỗi block cần có một con trỏ để liên kết với block trống tiếp theo:
 
 ```c
-void *memory = malloc(size);
-free(memory);
+typedef struct PoolBlock
+{
+    struct PoolBlock *next;
+    uint8_t payload[POOL_BLOCK_DATA_SIZE];
+} PoolBlock;
 ```
 
-Cách này thuận tiện nhưng có thể gây ra một số vấn đề trong firmware chạy lâu hoặc có yêu cầu thời gian thực.
-
-### 1.1. Thời gian cấp phát không cố định
-
-Allocator phải tìm vùng nhớ phù hợp, tách block, cập nhật metadata hoặc gộp các vùng trống. Thời gian thực thi có thể thay đổi tùy trạng thái Heap.
-
-Điều này gây khó khăn khi cần xác định:
+Khi block đang nằm trong free list:
 
 ```text
-Worst-Case Execution Time
+next → block trống tiếp theo
 ```
 
-### 1.2. Phân mảnh bộ nhớ
-
-Sau nhiều lần cấp phát và giải phóng các block có kích thước khác nhau, Heap có thể còn đủ tổng số byte trống nhưng không có một vùng liên tục đủ lớn cho yêu cầu mới.
+Khi block được cấp phát:
 
 ```text
-Heap:
-
-+------+----+--------+---+------+
-| used |free|  used  |free| used |
-+------+----+--------+---+------+
+payload → vùng dữ liệu ứng dụng có thể sử dụng
 ```
-
-Tổng vùng trống có thể lớn nhưng bị chia thành nhiều đoạn nhỏ.
-
-### 1.3. Khó dự đoán giới hạn sử dụng
-
-Một lỗi logic có thể liên tục gọi `malloc()` mà không `free()`, dẫn đến Memory Leak và cuối cùng làm cạn Heap.
-
-### 1.4. Khó dùng an toàn trong ISR
-
-Nhiều allocator:
-
-- Không reentrant.
-- Dùng lock nội bộ.
-- Có thời gian thực thi không xác định.
-- Không được thiết kế để gọi trong Interrupt Service Routine.
-
-### 1.5. Lỗi quản lý vòng đời
-
-Các lỗi phổ biến gồm:
-
-- Memory Leak.
-- Double Free.
-- Use-After-Free.
-- Heap Corruption.
-- Ghi vượt kích thước block.
-
-Memory Pool không tự loại bỏ mọi lỗi trên, nhưng giới hạn rõ vùng nhớ và số block giúp hệ thống dễ kiểm soát hơn.
 
 ---
 
-## 2. Memory Pool là gì?
+## 4. Nguyên lý hoạt động
 
-Memory Pool chuẩn bị trước một vùng nhớ gồm nhiều block.
+## 4.1. Trạng thái ban đầu
+
+Giả sử pool có 4 block:
+
+```text
+Index:       0           1           2           3
+         +-------+   +-------+   +-------+   +-------+
+Pool:    |   B0  |   |   B1  |   |   B2  |   |   B3  |
+         +-------+   +-------+   +-------+   +-------+
+```
+
+Sau khi khởi tạo, toàn bộ block đều trống:
+
+```text
+free_list
+    |
+    v
+   B0 -> B1 -> B2 -> B3 -> NULL
+```
+
+Số block trống:
+
+```text
+free_count = 4
+```
+
+Số block đang sử dụng:
+
+```text
+used_count = 0
+```
+
+---
+
+## 4.2. Cấp phát block đầu tiên
+
+Khi gọi:
+
+```c
+PoolBlock *block = MemoryPool_Allocate(&pool);
+```
+
+Pool lấy phần tử đầu của free list:
+
+```text
+allocated = B0
+```
+
+Sau đó cập nhật free list:
+
+```text
+free_list
+    |
+    v
+   B1 -> B2 -> B3 -> NULL
+```
+
+Kết quả trả về:
+
+```text
+block -> B0
+```
+
+---
+
+## 4.3. Cấp phát thêm một block
+
+Lần tiếp theo:
+
+```text
+allocated = B1
+```
+
+Free list trở thành:
+
+```text
+free_list
+    |
+    v
+   B2 -> B3 -> NULL
+```
+
+Hai block đang được sử dụng:
+
+```text
+B0, B1
+```
+
+Hai block còn trống:
+
+```text
+B2, B3
+```
+
+---
+
+## 4.4. Giải phóng một block
+
+Giả sử `B0` đã được sử dụng xong.
+
+Khi gọi:
+
+```c
+MemoryPool_Free(&pool, B0);
+```
+
+`B0` được chèn lại vào đầu free list:
+
+```text
+B0 -> B2 -> B3 -> NULL
+^
+|
+free_list
+```
+
+Thứ tự block trong free list không nhất thiết giống thứ tự ban đầu trong mảng.
+
+Điều quan trọng là:
+
+- Mỗi block trống xuất hiện đúng một lần trong free list.
+- Block đang sử dụng không nằm trong free list.
+- Không có liên kết bị mất hoặc tạo cycle ngoài ý muốn.
+
+---
+
+## 4.5. Khi Pool hết block
+
+Nếu tất cả block đã được cấp phát:
+
+```text
+free_list = NULL
+free_count = 0
+```
+
+Lần cấp phát tiếp theo phải trả về lỗi:
+
+```c
+NULL
+```
+
+Chương trình sử dụng Memory Pool phải xử lý tình huống này.
 
 Ví dụ:
 
-```text
-Số block:       16
-Payload/block:  32 byte
-Tổng payload:   512 byte
-```
-
-Mỗi block có hai trạng thái logic:
-
-```text
-FREE    : đang nằm trong free list
-IN USE  : đã được cấp cho ứng dụng
-```
-
-Các thao tác chính:
-
 ```c
-memory_pool_init();
-memory_pool_alloc();
-memory_pool_free();
+PoolBlock *block = MemoryPool_Allocate(&pool);
+
+if (block == NULL)
+{
+    /* Pool exhausted: drop, retry, log or enter safe state. */
+}
 ```
 
-### Quy trình sử dụng
-
-```text
-1. Khởi tạo Pool
-2. Lấy một block rảnh
-3. Ghi dữ liệu vào block
-4. Truyền quyền sở hữu cho thành phần xử lý
-5. Trả block về Pool khi dùng xong
-```
-
-### Fixed-Block Memory Pool
-
-Tài liệu này sử dụng loại đơn giản và phổ biến nhất:
-
-```text
-Tất cả block có cùng kích thước
-```
-
-Ưu điểm:
-
-- Cấp phát `O(1)`.
-- Giải phóng `O(1)`.
-- Không cần tìm block theo kích thước.
-- Không có phân mảnh ngoài bên trong Pool.
-- Dễ dùng với mảng tĩnh.
-
-Nhược điểm:
-
-- Yêu cầu nhỏ vẫn chiếm toàn bộ một block.
-- Không thể cấp phát object lớn hơn payload của block.
-- Số object đồng thời bị giới hạn bởi số block.
+Không được dereference con trỏ khi kết quả cấp phát là `NULL`.
 
 ---
 
-## 3. Cấu trúc của Fixed-Block Memory Pool
+## 5. Thiết kế Memory Pool
 
-Một Pool hoàn chỉnh trong tài liệu này gồm:
+Ví dụ trong tài liệu này sử dụng:
+
+```text
+Số block:                  16
+Dung lượng dữ liệu/block:  32 byte
+```
+
+### Cấu trúc một block
+
+```c
+typedef struct MemoryPoolBlock
+{
+    struct MemoryPoolBlock *next;
+    uint8_t data[32];
+} MemoryPoolBlock;
+```
+
+### Cấu trúc quản lý pool
 
 ```c
 typedef struct
 {
-    memory_pool_block_t blocks[MEMORY_POOL_BLOCK_COUNT];
-    memory_pool_block_t *free_list;
+    MemoryPoolBlock *free_list;
+    MemoryPoolBlock *storage;
+    size_t capacity;
     size_t free_count;
     size_t minimum_free_count;
     bool initialized;
-    bool in_use[MEMORY_POOL_BLOCK_COUNT];
-} memory_pool_t;
+} MemoryPool;
 ```
 
-### `blocks`
+### Ý nghĩa các trường
 
-Mảng tĩnh chứa toàn bộ block:
+#### `free_list`
 
-```c
-memory_pool_block_t blocks[MEMORY_POOL_BLOCK_COUNT];
-```
+Trỏ đến block trống đầu tiên.
 
-Vùng nhớ này được tạo ngay khi object Pool được tạo. Không cần gọi `malloc()` trong quá trình chạy.
+#### `storage`
 
-### `free_list`
+Trỏ đến mảng chứa toàn bộ block.
 
-Trỏ đến block rảnh đầu tiên:
+#### `capacity`
 
-```c
-memory_pool_block_t *free_list;
-```
+Tổng số block trong pool.
 
-Các block rảnh được nối với nhau bằng Singly Linked List.
+#### `free_count`
 
-### `free_count`
+Số block hiện còn trống.
 
-Số block đang rảnh:
+#### `minimum_free_count`
 
-```c
-size_t free_count;
-```
+Số block trống thấp nhất từng ghi nhận.
 
-Số block đang dùng:
+Giá trị này giúp đánh giá mức sử dụng cao nhất:
 
 ```text
-used_count = block_count - free_count
+maximum_used = capacity - minimum_free_count
 ```
 
-### `minimum_free_count`
+#### `initialized`
 
-Giá trị nhỏ nhất của `free_count` từng ghi nhận:
-
-```c
-size_t minimum_free_count;
-```
-
-Đây là High-Water Mark theo hướng sử dụng:
-
-```text
-maximum_used = block_count - minimum_free_count
-```
-
-Thông tin này giúp chọn lại kích thước Pool dựa trên dữ liệu thực tế.
-
-### `in_use`
-
-Mảng trạng thái dùng để:
-
-- Phát hiện Double Free.
-- Kiểm tra block có thực sự đang được cấp phát.
-- Hỗ trợ debug.
-
-Trong bản tối giản để tiết kiệm RAM, có thể loại bỏ trường này nếu hệ thống đã kiểm soát ownership chặt chẽ.
+Cho biết pool đã được khởi tạo hay chưa.
 
 ---
 
-## 4. Cơ chế hoạt động
+## 6. Cài đặt bằng C
 
-## 4.1. Khởi tạo
-
-Mỗi block được nối đến block tiếp theo:
-
-```c
-blocks[0].next = &blocks[1];
-blocks[1].next = &blocks[2];
-blocks[2].next = &blocks[3];
-blocks[3].next = NULL;
-```
-
-Sau đó:
-
-```c
-free_list = &blocks[0];
-```
-
-Sơ đồ:
+Cấu trúc project:
 
 ```text
-free_list
-    |
-    v
-[0] -> [1] -> [2] -> [3] -> NULL
-```
-
-## 4.2. Cấp phát
-
-Lấy block đầu free list:
-
-```c
-block = pool->free_list;
-```
-
-Dịch free list sang block tiếp theo:
-
-```c
-pool->free_list = block->next;
-```
-
-Tách block khỏi danh sách:
-
-```c
-block->next = NULL;
-```
-
-Sau một lần cấp phát:
-
-```text
-Allocated: [0]
-
-free_list
-    |
-    v
-[1] -> [2] -> [3] -> NULL
-```
-
-## 4.3. Giải phóng
-
-Đưa block trở lại đầu free list:
-
-```c
-block->next = pool->free_list;
-pool->free_list = block;
-```
-
-Ví dụ trả block `[0]`:
-
-```text
-free_list
-    |
-    v
-[0] -> [1] -> [2] -> [3] -> NULL
-```
-
-Cả cấp phát và giải phóng đều chỉ thay đổi một số con trỏ cố định.
-
-## 4.4. Thứ tự block sau nhiều lần sử dụng
-
-Free list không cần giữ thứ tự tăng dần theo index.
-
-```text
-[5] -> [1] -> [12] -> [3] -> NULL
-```
-
-Điều quan trọng là:
-
-- Mỗi block rảnh xuất hiện đúng một lần.
-- Block đang sử dụng không nằm trong free list.
-- Free list không có chu trình.
-- `free_count` phản ánh đúng số block rảnh.
-
----
-
-## 5. Độ phức tạp và đặc tính bộ nhớ
-
-| Thao tác | Độ phức tạp |
-|---|---:|
-| Khởi tạo | `O(N)` |
-| Cấp phát một block | `O(1)` |
-| Giải phóng một block | `O(1)` |
-| Kiểm tra số block rảnh | `O(1)` |
-| Kiểm tra Pool rỗng/đầy | `O(1)` |
-| Xóa payload khi cấp phát | `O(B)` |
-| Kiểm tra toàn bộ Pool | `O(N)` |
-
-Trong đó:
-
-```text
-N = số block
-B = số byte payload của một block
-```
-
-Dung lượng tĩnh xấp xỉ:
-
-```text
-N × sizeof(memory_pool_block_t)
-+ N × sizeof(bool)
-+ metadata của Pool
-```
-
-Nếu bật xóa payload bằng `memset()` sau mỗi lần cấp phát, thao tác cấp phát không còn thuần `O(1)` theo số byte, mà là `O(B)`. Với block có kích thước cố định, thời gian vẫn có giới hạn trên rõ ràng.
-
----
-
-## 6. Thiết kế API
-
-API được chia thành các nhóm.
-
-### Khởi tạo
-
-```c
-memory_pool_status_t memory_pool_init(memory_pool_t *pool);
-```
-
-### Cấp phát và giải phóng
-
-```c
-void *memory_pool_alloc(memory_pool_t *pool);
-memory_pool_status_t memory_pool_free(memory_pool_t *pool, void *memory);
-```
-
-### Thông tin trạng thái
-
-```c
-size_t memory_pool_free_count(const memory_pool_t *pool);
-size_t memory_pool_used_count(const memory_pool_t *pool);
-size_t memory_pool_maximum_used(const memory_pool_t *pool);
-
-bool memory_pool_is_empty(const memory_pool_t *pool);
-bool memory_pool_is_full(const memory_pool_t *pool);
-```
-
-Quy ước:
-
-```text
-Pool empty: không còn block rảnh
-Pool full:  tất cả block đều rảnh
-```
-
-Tên gọi này được xét theo “Pool chứa block rảnh”, không phải theo queue dữ liệu của ứng dụng.
-
-### Mã trạng thái
-
-```c
-typedef enum
-{
-    MEMORY_POOL_OK = 0,
-    MEMORY_POOL_INVALID_ARGUMENT,
-    MEMORY_POOL_NOT_INITIALIZED,
-    MEMORY_POOL_EXHAUSTED,
-    MEMORY_POOL_POINTER_OUT_OF_RANGE,
-    MEMORY_POOL_POINTER_MISALIGNED,
-    MEMORY_POOL_DOUBLE_FREE
-} memory_pool_status_t;
+memory-pool/
+├── include/
+│   └── memory_pool.h
+├── src/
+│   ├── memory_pool.c
+│   └── main.c
+└── README.md
 ```
 
 ---
 
-## 7. Mã nguồn hoàn chỉnh
-
-### `memory_pool.h`
+### 6.1. File `memory_pool.h`
 
 ```c
 #ifndef MEMORY_POOL_H
@@ -458,454 +412,526 @@ typedef enum
 #include <stddef.h>
 #include <stdint.h>
 
-/*
- * Adjust these values for the application.
- */
-#define MEMORY_POOL_BLOCK_COUNT   16U
-#define MEMORY_POOL_PAYLOAD_SIZE  32U
+#define MEMORY_POOL_BLOCK_DATA_SIZE    32U
 
-typedef enum
+typedef struct MemoryPoolBlock
 {
-    MEMORY_POOL_OK = 0,
-    MEMORY_POOL_INVALID_ARGUMENT,
-    MEMORY_POOL_NOT_INITIALIZED,
-    MEMORY_POOL_EXHAUSTED,
-    MEMORY_POOL_POINTER_OUT_OF_RANGE,
-    MEMORY_POOL_POINTER_MISALIGNED,
-    MEMORY_POOL_DOUBLE_FREE
-} memory_pool_status_t;
-
-/*
- * max_align_t ensures the returned payload is suitably aligned for
- * ordinary scalar types and structures supported by the implementation.
- */
-typedef union
-{
-    max_align_t alignment;
-    uint8_t bytes[MEMORY_POOL_PAYLOAD_SIZE];
-} memory_pool_payload_t;
-
-typedef struct memory_pool_block
-{
-    struct memory_pool_block *next;
-    memory_pool_payload_t payload;
-} memory_pool_block_t;
+    struct MemoryPoolBlock *next;
+    uint8_t data[MEMORY_POOL_BLOCK_DATA_SIZE];
+} MemoryPoolBlock;
 
 typedef struct
 {
-    memory_pool_block_t blocks[MEMORY_POOL_BLOCK_COUNT];
-    memory_pool_block_t *free_list;
+    MemoryPoolBlock *free_list;
+    MemoryPoolBlock *storage;
 
+    size_t capacity;
     size_t free_count;
     size_t minimum_free_count;
 
     bool initialized;
-    bool in_use[MEMORY_POOL_BLOCK_COUNT];
-} memory_pool_t;
+} MemoryPool;
 
-memory_pool_status_t memory_pool_init(memory_pool_t *pool);
+/**
+ * @brief Initialize a pool with an externally supplied block array.
+ *
+ * @param pool      Pool control structure.
+ * @param storage   Array used as pool storage.
+ * @param capacity  Number of blocks in storage.
+ *
+ * @return true on success, false on invalid arguments.
+ */
+bool MemoryPool_Init(
+    MemoryPool *pool,
+    MemoryPoolBlock *storage,
+    size_t capacity
+);
 
-void *memory_pool_alloc(memory_pool_t *pool);
+/**
+ * @brief Obtain one block from the pool.
+ *
+ * @return Address of an available block or NULL when no block is available.
+ */
+MemoryPoolBlock *MemoryPool_Allocate(MemoryPool *pool);
 
-memory_pool_status_t memory_pool_free(memory_pool_t *pool,
-                                      void *memory);
+/**
+ * @brief Return a block to the pool.
+ *
+ * @return true on success, false when the pool or block is invalid.
+ */
+bool MemoryPool_Free(
+    MemoryPool *pool,
+    MemoryPoolBlock *block
+);
 
-size_t memory_pool_capacity(const memory_pool_t *pool);
-size_t memory_pool_free_count(const memory_pool_t *pool);
-size_t memory_pool_used_count(const memory_pool_t *pool);
-size_t memory_pool_maximum_used(const memory_pool_t *pool);
+/**
+ * @brief Check whether an address belongs to this pool.
+ */
+bool MemoryPool_Owns(
+    const MemoryPool *pool,
+    const MemoryPoolBlock *block
+);
 
-bool memory_pool_is_empty(const memory_pool_t *pool);
-bool memory_pool_is_full(const memory_pool_t *pool);
+/**
+ * @brief Return the number of currently available blocks.
+ */
+size_t MemoryPool_GetFreeCount(const MemoryPool *pool);
 
-bool memory_pool_owns(const memory_pool_t *pool,
-                      const void *memory);
+/**
+ * @brief Return the number of currently allocated blocks.
+ */
+size_t MemoryPool_GetUsedCount(const MemoryPool *pool);
+
+/**
+ * @brief Return the maximum number of blocks used at the same time.
+ */
+size_t MemoryPool_GetHighWaterMark(const MemoryPool *pool);
+
+/**
+ * @brief Return true when no free block remains.
+ */
+bool MemoryPool_IsEmpty(const MemoryPool *pool);
+
+/**
+ * @brief Reset all blocks to the free state.
+ *
+ * This function invalidates every block previously returned to users.
+ */
+bool MemoryPool_Reset(MemoryPool *pool);
 
 #endif
 ```
 
-### `memory_pool.c`
+---
+
+### 6.2. File `memory_pool.c`
 
 ```c
 #include "memory_pool.h"
 
-#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
-static bool memory_pool_is_valid(const memory_pool_t *pool)
+static bool MemoryPool_IsBlockFree(
+    const MemoryPool *pool,
+    const MemoryPoolBlock *block
+)
 {
-    return (pool != NULL) && pool->initialized;
+    const MemoryPoolBlock *current;
+
+    if ((pool == NULL) || (block == NULL))
+    {
+        return false;
+    }
+
+    current = pool->free_list;
+
+    while (current != NULL)
+    {
+        if (current == block)
+        {
+            return true;
+        }
+
+        current = current->next;
+    }
+
+    return false;
 }
 
-static memory_pool_status_t memory_pool_get_block_index(
-    const memory_pool_t *pool,
-    const void *memory,
-    size_t *index)
-{
-    const uintptr_t pool_begin =
-        (uintptr_t)(const void *)&pool->blocks[0];
-
-    const uintptr_t pool_end =
-        (uintptr_t)(const void *)&pool->blocks[MEMORY_POOL_BLOCK_COUNT];
-
-    const uintptr_t payload_address =
-        (uintptr_t)memory;
-
-    const size_t payload_offset =
-        offsetof(memory_pool_block_t, payload);
-
-    uintptr_t block_address;
-    uintptr_t offset;
-
-    if ((pool == NULL) || (memory == NULL) || (index == NULL))
-    {
-        return MEMORY_POOL_INVALID_ARGUMENT;
-    }
-
-    if (payload_address < payload_offset)
-    {
-        return MEMORY_POOL_POINTER_OUT_OF_RANGE;
-    }
-
-    block_address = payload_address - payload_offset;
-
-    if ((block_address < pool_begin) || (block_address >= pool_end))
-    {
-        return MEMORY_POOL_POINTER_OUT_OF_RANGE;
-    }
-
-    offset = block_address - pool_begin;
-
-    if ((offset % sizeof(memory_pool_block_t)) != 0U)
-    {
-        return MEMORY_POOL_POINTER_MISALIGNED;
-    }
-
-    *index = (size_t)(offset / sizeof(memory_pool_block_t));
-
-    if (*index >= MEMORY_POOL_BLOCK_COUNT)
-    {
-        return MEMORY_POOL_POINTER_OUT_OF_RANGE;
-    }
-
-    /*
-     * Only a pointer to the beginning of payload is accepted.
-     */
-    if (memory != (const void *)&pool->blocks[*index].payload)
-    {
-        return MEMORY_POOL_POINTER_MISALIGNED;
-    }
-
-    return MEMORY_POOL_OK;
-}
-
-memory_pool_status_t memory_pool_init(memory_pool_t *pool)
+bool MemoryPool_Init(
+    MemoryPool *pool,
+    MemoryPoolBlock *storage,
+    size_t capacity
+)
 {
     size_t index;
 
-    if (pool == NULL)
+    if ((pool == NULL) || (storage == NULL) || (capacity == 0U))
     {
-        return MEMORY_POOL_INVALID_ARGUMENT;
+        return false;
     }
 
-    for (index = 0U; index < MEMORY_POOL_BLOCK_COUNT; index++)
+    pool->storage = storage;
+    pool->capacity = capacity;
+    pool->free_count = capacity;
+    pool->minimum_free_count = capacity;
+    pool->initialized = true;
+
+    for (index = 0U; index < capacity; index++)
     {
-        if (index < (MEMORY_POOL_BLOCK_COUNT - 1U))
+        memset(storage[index].data, 0, sizeof(storage[index].data));
+
+        if ((index + 1U) < capacity)
         {
-            pool->blocks[index].next = &pool->blocks[index + 1U];
+            storage[index].next = &storage[index + 1U];
         }
         else
         {
-            pool->blocks[index].next = NULL;
+            storage[index].next = NULL;
         }
-
-        pool->in_use[index] = false;
     }
 
-    pool->free_list = &pool->blocks[0];
-    pool->free_count = MEMORY_POOL_BLOCK_COUNT;
-    pool->minimum_free_count = MEMORY_POOL_BLOCK_COUNT;
-    pool->initialized = true;
+    pool->free_list = &storage[0];
 
-    return MEMORY_POOL_OK;
+    return true;
 }
 
-void *memory_pool_alloc(memory_pool_t *pool)
+MemoryPoolBlock *MemoryPool_Allocate(MemoryPool *pool)
 {
-    memory_pool_block_t *block;
-    size_t index;
+    MemoryPoolBlock *allocated_block;
 
-    if (!memory_pool_is_valid(pool))
+    if ((pool == NULL) || (!pool->initialized))
     {
         return NULL;
     }
 
-    block = pool->free_list;
-
-    if (block == NULL)
+    if (pool->free_list == NULL)
     {
         return NULL;
     }
 
-    pool->free_list = block->next;
-    block->next = NULL;
+    allocated_block = pool->free_list;
+    pool->free_list = allocated_block->next;
 
-    index = (size_t)(block - &pool->blocks[0]);
-    pool->in_use[index] = true;
+    allocated_block->next = NULL;
 
-    pool->free_count--;
+    if (pool->free_count > 0U)
+    {
+        pool->free_count--;
+    }
 
     if (pool->free_count < pool->minimum_free_count)
     {
         pool->minimum_free_count = pool->free_count;
     }
 
-    /*
-     * Optional: clear old data before giving the block to the caller.
-     * Remove this memset if allocation latency is more important.
-     */
-    (void)memset(block->payload.bytes,
-                 0,
-                 sizeof(block->payload.bytes));
-
-    return (void *)&block->payload;
+    return allocated_block;
 }
 
-memory_pool_status_t memory_pool_free(memory_pool_t *pool,
-                                      void *memory)
+bool MemoryPool_Owns(
+    const MemoryPool *pool,
+    const MemoryPoolBlock *block
+)
 {
-    memory_pool_status_t status;
-    memory_pool_block_t *block;
-    size_t index;
+    uintptr_t pool_begin;
+    uintptr_t pool_end;
+    uintptr_t block_address;
+    uintptr_t offset;
 
-    if (pool == NULL)
-    {
-        return MEMORY_POOL_INVALID_ARGUMENT;
-    }
-
-    if (!pool->initialized)
-    {
-        return MEMORY_POOL_NOT_INITIALIZED;
-    }
-
-    status = memory_pool_get_block_index(pool, memory, &index);
-
-    if (status != MEMORY_POOL_OK)
-    {
-        return status;
-    }
-
-    if (!pool->in_use[index])
-    {
-        return MEMORY_POOL_DOUBLE_FREE;
-    }
-
-    block = &pool->blocks[index];
-
-    pool->in_use[index] = false;
-
-    block->next = pool->free_list;
-    pool->free_list = block;
-
-    pool->free_count++;
-
-    return MEMORY_POOL_OK;
-}
-
-size_t memory_pool_capacity(const memory_pool_t *pool)
-{
-    return memory_pool_is_valid(pool)
-               ? MEMORY_POOL_BLOCK_COUNT
-               : 0U;
-}
-
-size_t memory_pool_free_count(const memory_pool_t *pool)
-{
-    return memory_pool_is_valid(pool)
-               ? pool->free_count
-               : 0U;
-}
-
-size_t memory_pool_used_count(const memory_pool_t *pool)
-{
-    return memory_pool_is_valid(pool)
-               ? (MEMORY_POOL_BLOCK_COUNT - pool->free_count)
-               : 0U;
-}
-
-size_t memory_pool_maximum_used(const memory_pool_t *pool)
-{
-    return memory_pool_is_valid(pool)
-               ? (MEMORY_POOL_BLOCK_COUNT - pool->minimum_free_count)
-               : 0U;
-}
-
-bool memory_pool_is_empty(const memory_pool_t *pool)
-{
-    return memory_pool_is_valid(pool) &&
-           (pool->free_count == 0U);
-}
-
-bool memory_pool_is_full(const memory_pool_t *pool)
-{
-    return memory_pool_is_valid(pool) &&
-           (pool->free_count == MEMORY_POOL_BLOCK_COUNT);
-}
-
-bool memory_pool_owns(const memory_pool_t *pool,
-                      const void *memory)
-{
-    size_t index;
-
-    if (!memory_pool_is_valid(pool))
+    if ((pool == NULL) ||
+        (!pool->initialized) ||
+        (pool->storage == NULL) ||
+        (block == NULL))
     {
         return false;
     }
 
-    return memory_pool_get_block_index(pool,
-                                       memory,
-                                       &index) == MEMORY_POOL_OK;
-}
-```
+    pool_begin = (uintptr_t)&pool->storage[0];
+    pool_end =
+        (uintptr_t)&pool->storage[pool->capacity];
+    block_address = (uintptr_t)block;
 
-### Điểm khác biệt so với bản tối giản
-
-Bản triển khai trên bổ sung:
-
-- Kiểm tra Pool đã khởi tạo.
-- Kiểm tra con trỏ có thuộc Pool hay không.
-- Kiểm tra con trỏ có trỏ đúng đầu payload hay không.
-- Phát hiện Double Free.
-- Theo dõi số block đang dùng.
-- Theo dõi mức sử dụng lớn nhất.
-- Bảo đảm alignment bằng `max_align_t`.
-- Xóa dữ liệu cũ trước khi trả block cho caller.
-
-Trong bản production tối ưu RAM, có thể tắt một số cơ chế debug bằng macro biên dịch.
-
----
-
-## 8. Ví dụ sử dụng cơ bản
-
-### `main.c`
-
-```c
-#include <stdio.h>
-#include <string.h>
-
-#include "memory_pool.h"
-
-typedef struct
-{
-    uint16_t id;
-    uint16_t length;
-    uint8_t data[16];
-} message_t;
-
-int main(void)
-{
-    memory_pool_t pool;
-    message_t *message;
-    memory_pool_status_t status;
-
-    status = memory_pool_init(&pool);
-
-    if (status != MEMORY_POOL_OK)
+    if ((block_address < pool_begin) ||
+        (block_address >= pool_end))
     {
-        return 1;
+        return false;
+    }
+
+    offset = block_address - pool_begin;
+
+    return (offset % sizeof(MemoryPoolBlock)) == 0U;
+}
+
+bool MemoryPool_Free(
+    MemoryPool *pool,
+    MemoryPoolBlock *block
+)
+{
+    if ((pool == NULL) ||
+        (!pool->initialized) ||
+        (block == NULL))
+    {
+        return false;
+    }
+
+    if (!MemoryPool_Owns(pool, block))
+    {
+        return false;
     }
 
     /*
-     * Compile-time protection: the object must fit in one pool block.
+     * This traversal detects a simple double-free condition.
+     * It can be disabled in performance-critical production builds
+     * when object ownership is already guaranteed by design.
      */
-    _Static_assert(sizeof(message_t) <= MEMORY_POOL_PAYLOAD_SIZE,
-                   "message_t is larger than one pool block");
-
-    message = (message_t *)memory_pool_alloc(&pool);
-
-    if (message == NULL)
+    if (MemoryPool_IsBlockFree(pool, block))
     {
-        printf("Pool exhausted\n");
+        return false;
+    }
+
+    memset(block->data, 0, sizeof(block->data));
+
+    block->next = pool->free_list;
+    pool->free_list = block;
+
+    if (pool->free_count < pool->capacity)
+    {
+        pool->free_count++;
+    }
+
+    return true;
+}
+
+size_t MemoryPool_GetFreeCount(const MemoryPool *pool)
+{
+    if ((pool == NULL) || (!pool->initialized))
+    {
+        return 0U;
+    }
+
+    return pool->free_count;
+}
+
+size_t MemoryPool_GetUsedCount(const MemoryPool *pool)
+{
+    if ((pool == NULL) || (!pool->initialized))
+    {
+        return 0U;
+    }
+
+    return pool->capacity - pool->free_count;
+}
+
+size_t MemoryPool_GetHighWaterMark(const MemoryPool *pool)
+{
+    if ((pool == NULL) || (!pool->initialized))
+    {
+        return 0U;
+    }
+
+    return pool->capacity - pool->minimum_free_count;
+}
+
+bool MemoryPool_IsEmpty(const MemoryPool *pool)
+{
+    if ((pool == NULL) || (!pool->initialized))
+    {
+        return true;
+    }
+
+    return pool->free_list == NULL;
+}
+
+bool MemoryPool_Reset(MemoryPool *pool)
+{
+    if ((pool == NULL) ||
+        (!pool->initialized) ||
+        (pool->storage == NULL) ||
+        (pool->capacity == 0U))
+    {
+        return false;
+    }
+
+    return MemoryPool_Init(
+        pool,
+        pool->storage,
+        pool->capacity
+    );
+}
+```
+
+---
+
+### 6.3. File `main.c`
+
+```c
+#include "memory_pool.h"
+
+#include <stdio.h>
+#include <string.h>
+
+#define APP_POOL_CAPACITY    16U
+
+static MemoryPool app_pool;
+static MemoryPoolBlock app_pool_storage[APP_POOL_CAPACITY];
+
+int main(void)
+{
+    MemoryPoolBlock *first;
+    MemoryPoolBlock *second;
+
+    if (!MemoryPool_Init(
+            &app_pool,
+            app_pool_storage,
+            APP_POOL_CAPACITY))
+    {
+        printf("Pool initialization failed.\n");
         return 1;
     }
 
-    message->id = 100U;
-    message->length = 5U;
-    (void)memcpy(message->data, "HELLO", message->length);
+    first = MemoryPool_Allocate(&app_pool);
+    second = MemoryPool_Allocate(&app_pool);
 
-    printf("Message ID: %u\n", (unsigned int)message->id);
-    printf("Free blocks: %zu\n", memory_pool_free_count(&pool));
-    printf("Used blocks: %zu\n", memory_pool_used_count(&pool));
-
-    status = memory_pool_free(&pool, message);
-
-    if (status != MEMORY_POOL_OK)
+    if ((first == NULL) || (second == NULL))
     {
-        printf("Free failed: %d\n", (int)status);
+        printf("Pool allocation failed.\n");
         return 1;
     }
 
-    printf("Free blocks after release: %zu\n",
-           memory_pool_free_count(&pool));
+    memcpy(first->data, "MESSAGE_A", sizeof("MESSAGE_A"));
+    memcpy(second->data, "MESSAGE_B", sizeof("MESSAGE_B"));
+
+    printf("First block:  %s\n", (char *)first->data);
+    printf("Second block: %s\n", (char *)second->data);
+
+    printf(
+        "Used: %zu, Free: %zu\n",
+        MemoryPool_GetUsedCount(&app_pool),
+        MemoryPool_GetFreeCount(&app_pool)
+    );
+
+    if (!MemoryPool_Free(&app_pool, first))
+    {
+        printf("Could not return the first block.\n");
+    }
+
+    if (!MemoryPool_Free(&app_pool, second))
+    {
+        printf("Could not return the second block.\n");
+    }
+
+    printf(
+        "Used: %zu, Free: %zu\n",
+        MemoryPool_GetUsedCount(&app_pool),
+        MemoryPool_GetFreeCount(&app_pool)
+    );
+
+    printf(
+        "Maximum simultaneous usage: %zu\n",
+        MemoryPool_GetHighWaterMark(&app_pool)
+    );
 
     return 0;
 }
 ```
 
-### Kết quả dự kiến
+---
 
-```text
-Message ID: 100
-Free blocks: 15
-Used blocks: 1
-Free blocks after release: 16
-```
-
-### Biên dịch bằng GCC
+### 6.4. Biên dịch
 
 ```bash
-gcc -std=c11 -Wall -Wextra -Wpedantic \
-    src/memory_pool.c examples/basic/main.c \
-    -Iinc -o memory_pool_demo
+gcc -std=c11 \
+    -Wall \
+    -Wextra \
+    -Wpedantic \
+    -Iinclude \
+    src/memory_pool.c \
+    src/main.c \
+    -o memory_pool_demo
+```
+
+Chạy:
+
+```bash
+./memory_pool_demo
+```
+
+Kết quả dự kiến:
+
+```text
+First block:  MESSAGE_A
+Second block: MESSAGE_B
+Used: 2, Free: 14
+Used: 0, Free: 16
+Maximum simultaneous usage: 2
 ```
 
 ---
 
-## 9. Ứng dụng Event Pool
+## 7. Ví dụ sử dụng
 
-Trong kiến trúc Event-Driven, một producer tạo Event và gửi cho consumer xử lý.
+## 7.1. Sử dụng tương tự `malloc()`
 
-```text
-Button ISR / UART ISR / Timer
-             |
-             | allocate event
-             v
-       +-------------+
-       | Event Pool  |
-       +-------------+
-             |
-             | post pointer
-             v
-       +-------------+
-       | Event Queue |
-       +-------------+
-             |
-             | get event
-             v
-       +-------------+
-       | Active      |
-       | Object/Task |
-       +-------------+
-             |
-             | free event
-             v
-       +-------------+
-       | Event Pool  |
-       +-------------+
+Với Heap:
+
+```c
+Message *message = malloc(sizeof(Message));
+
+if (message == NULL)
+{
+    /* Allocation failed. */
+}
 ```
 
-### Định nghĩa Event
+Với Memory Pool:
+
+```c
+MemoryPoolBlock *block = MemoryPool_Allocate(&app_pool);
+
+if (block == NULL)
+{
+    /* No free block remains. */
+}
+```
+
+Cả hai cách đều trả về địa chỉ vùng nhớ cho người dùng.
+
+Điểm khác biệt là Memory Pool lấy bộ nhớ từ vùng đã được chuẩn bị trước, thay vì yêu cầu Heap tìm một vùng nhớ mới.
+
+---
+
+## 7.2. Lưu một Message
+
+```c
+typedef struct
+{
+    uint16_t signal;
+    uint16_t length;
+    uint8_t payload[24];
+} AppMessage;
+```
+
+Kiểm tra kích thước:
+
+```c
+_Static_assert(
+    sizeof(AppMessage) <= MEMORY_POOL_BLOCK_DATA_SIZE,
+    "AppMessage is larger than one pool block"
+);
+```
+
+Cấp phát:
+
+```c
+MemoryPoolBlock *block;
+AppMessage *message;
+
+block = MemoryPool_Allocate(&app_pool);
+
+if (block != NULL)
+{
+    message = (AppMessage *)block->data;
+
+    message->signal = 10U;
+    message->length = 3U;
+    message->payload[0] = 0x11U;
+    message->payload[1] = 0x22U;
+    message->payload[2] = 0x33U;
+}
+```
+
+Giải phóng:
+
+```c
+MemoryPool_Free(&app_pool, block);
+```
+
+---
+
+## 7.3. Event-Driven System
+
+Định nghĩa Event:
 
 ```c
 typedef enum
@@ -914,1031 +940,1258 @@ typedef enum
     EVENT_BUTTON_PRESSED,
     EVENT_UART_RECEIVED,
     EVENT_TIMEOUT
-} event_signal_t;
+} EventSignal;
 
 typedef struct
 {
-    event_signal_t signal;
-    uint32_t parameter;
-} event_t;
+    EventSignal signal;
+    uint16_t length;
+    uint8_t payload[24];
+} Event;
 ```
 
-Kiểm tra kích thước:
+Cấp phát Event:
 
 ```c
-_Static_assert(sizeof(event_t) <= MEMORY_POOL_PAYLOAD_SIZE,
-               "event_t does not fit in the pool");
-```
+MemoryPoolBlock *block = MemoryPool_Allocate(&event_pool);
 
-### Tạo Event
-
-```c
-event_t *event_create(memory_pool_t *pool,
-                      event_signal_t signal,
-                      uint32_t parameter)
+if (block != NULL)
 {
-    event_t *event = (event_t *)memory_pool_alloc(pool);
+    Event *event = (Event *)block->data;
 
-    if (event == NULL)
-    {
-        return NULL;
-    }
+    event->signal = EVENT_BUTTON_PRESSED;
+    event->length = 0U;
 
-    event->signal = signal;
-    event->parameter = parameter;
-
-    return event;
+    EventQueue_Push(block);
 }
 ```
 
-### Xử lý và trả Event
+Task xử lý Event:
 
 ```c
-void event_dispatch(memory_pool_t *pool, event_t *event)
+void EventTask_Run(void)
 {
-    if ((pool == NULL) || (event == NULL))
+    MemoryPoolBlock *block;
+
+    block = EventQueue_Pop();
+
+    if (block != NULL)
     {
-        return;
+        Event *event = (Event *)block->data;
+
+        Event_Dispatch(event);
+
+        MemoryPool_Free(&event_pool, block);
     }
-
-    switch (event->signal)
-    {
-        case EVENT_BUTTON_PRESSED:
-            app_handle_button(event->parameter);
-            break;
-
-        case EVENT_UART_RECEIVED:
-            app_handle_uart(event->parameter);
-            break;
-
-        case EVENT_TIMEOUT:
-            app_handle_timeout(event->parameter);
-            break;
-
-        default:
-            break;
-    }
-
-    (void)memory_pool_free(pool, event);
 }
 ```
 
-### Ownership của Event
-
-Phải xác định rõ thành phần nào có trách nhiệm giải phóng.
-
-Một quy tắc đơn giản:
+Luồng xử lý:
 
 ```text
-Producer sở hữu Event trước khi post.
-Queue/Consumer sở hữu Event sau khi post thành công.
-Consumer trả Event về Pool sau khi xử lý.
+Producer
+   |
+   v
+Allocate block from Pool
+   |
+   v
+Fill Event data
+   |
+   v
+Push block into Event Queue
+   |
+   v
+Consumer receives block
+   |
+   v
+Process Event
+   |
+   v
+Return block to Pool
 ```
-
-Nếu post thất bại:
-
-```c
-event_t *event = event_create(&event_pool,
-                              EVENT_BUTTON_PRESSED,
-                              button_id);
-
-if (event != NULL)
-{
-    if (!event_queue_post(event))
-    {
-        /*
-         * Queue did not accept ownership.
-         */
-        (void)memory_pool_free(&event_pool, event);
-    }
-}
-```
-
-Không rõ ownership là nguyên nhân phổ biến gây Memory Leak hoặc Double Free.
 
 ---
 
-## 10. Ứng dụng Packet Buffer Pool
+## 7.4. Packet Buffer
 
-Các stack Ethernet, Wi-Fi, BLE, CAN gateway hoặc TCP/IP thường cần nhiều buffer có vòng đời ngắn.
+Ví dụ một packet nhỏ:
 
 ```c
 typedef struct
 {
     uint16_t length;
-    uint16_t interface_id;
-    uint8_t payload[28];
-} packet_t;
+    uint8_t data[28];
+} NetworkPacket;
 ```
 
-Nếu payload lớn hơn block của Pool hiện tại, cần:
-
-- Tăng `MEMORY_POOL_PAYLOAD_SIZE`.
-- Tạo Pool riêng cho Packet.
-- Dùng nhiều size class.
-- Dùng chain nhiều block.
-- Chỉ cấp phát descriptor, còn payload nằm trong DMA buffer khác.
-
-### Ví dụ Packet Pool riêng
-
-```c
-#define PACKET_POOL_COUNT         8U
-#define PACKET_PAYLOAD_CAPACITY   128U
-
-typedef struct packet_block
-{
-    struct packet_block *next;
-
-    uint16_t length;
-    uint8_t payload[PACKET_PAYLOAD_CAPACITY];
-} packet_block_t;
-
-typedef struct
-{
-    packet_block_t storage[PACKET_POOL_COUNT];
-    packet_block_t *free_list;
-} packet_pool_t;
-```
-
-### Luồng nhận packet
+Luồng nhận:
 
 ```text
-Peripheral/DMA
+Network ISR/DMA
       |
       v
-Allocate packet block
+Get packet block
       |
       v
-Copy or reference payload
+Store received bytes
       |
       v
-Post packet pointer to protocol task
+Pass block to protocol task
       |
       v
-Process packet
+Parse and process packet
       |
       v
-Return packet block to Pool
+Return block to pool
 ```
 
-### Khi Pool hết block
+Khi packet lớn hơn kích thước block, có thể:
 
-Các chiến lược có thể dùng:
-
-- Drop packet mới.
-- Drop packet cũ ít quan trọng.
-- Tăng bộ đếm overflow.
-- Tạm dừng RX nếu phần cứng hỗ trợ flow control.
-- Báo lỗi hệ thống.
-- Dùng backpressure.
-- Tăng Pool sau khi đo High-Water Mark.
-
-Không nên âm thầm tiếp tục dereference con trỏ `NULL`.
+- Tăng kích thước block.
+- Dùng nhiều loại pool.
+- Ghép nhiều block thành chuỗi.
+- Chỉ lưu descriptor trong pool và payload ở buffer riêng.
+- Dùng pool dành riêng cho packet lớn.
 
 ---
 
-## 11. Memory Pool cho Linked List
+## 8. Phân tích mã nguồn
 
-Memory Pool thường được dùng để cấp node cho Linked List mà không cần Heap.
+## 8.1. Khởi tạo free list
 
 ```c
-typedef struct Node
+for (index = 0U; index < capacity; index++)
 {
-    int data;
-    struct Node *next;
-} Node;
-```
-
-Kiểm tra kích thước:
-
-```c
-_Static_assert(sizeof(Node) <= MEMORY_POOL_PAYLOAD_SIZE,
-               "Node does not fit in the pool");
-```
-
-### Tạo node
-
-```c
-Node *node_create(memory_pool_t *pool, int value)
-{
-    Node *node = (Node *)memory_pool_alloc(pool);
-
-    if (node == NULL)
+    if ((index + 1U) < capacity)
     {
-        return NULL;
+        storage[index].next = &storage[index + 1U];
     }
-
-    node->data = value;
-    node->next = NULL;
-
-    return node;
+    else
+    {
+        storage[index].next = NULL;
+    }
 }
 ```
 
-### Xóa node
+Các block được nối theo thứ tự:
+
+```text
+storage[0]
+    |
+    v
+storage[1]
+    |
+    v
+storage[2]
+    |
+    v
+...
+    |
+    v
+storage[capacity - 1]
+    |
+    v
+NULL
+```
+
+Sau đó:
 
 ```c
-memory_pool_status_t node_destroy(memory_pool_t *pool,
-                                  Node *node)
-{
-    return memory_pool_free(pool, node);
-}
+pool->free_list = &storage[0];
 ```
-
-### Lợi ích
-
-- Không phân mảnh Heap.
-- Giới hạn node tối đa rõ ràng.
-- `allocate/free` trong `O(1)`.
-- Dễ theo dõi số node còn lại.
-- Phù hợp Event Queue, Timer List và danh sách Packet Descriptor.
 
 ---
 
-## 12. Sử dụng với Interrupt và RTOS
+## 8.2. Cấp phát một block
 
-Memory Pool trong ví dụ không tự thread-safe.
+```c
+allocated_block = pool->free_list;
+pool->free_list = allocated_block->next;
+```
 
-Các trường bị thay đổi trong một lần cấp phát:
+Minh họa:
+
+```text
+Trước:
+
+free_list
+    |
+    v
+   B0 -> B1 -> B2 -> NULL
+```
+
+Lấy `B0`:
+
+```text
+allocated_block -> B0
+```
+
+Cập nhật danh sách:
 
 ```text
 free_list
-in_use[index]
-free_count
-minimum_free_count
+    |
+    v
+   B1 -> B2 -> NULL
 ```
 
-Nếu hai execution context cùng thao tác, free list có thể bị hỏng.
-
-## 12.1. Critical Section
-
-Ví dụ khái niệm:
-
-```c
-void *memory_pool_alloc_safe(memory_pool_t *pool)
-{
-    void *memory;
-
-    ENTER_CRITICAL_SECTION();
-    memory = memory_pool_alloc(pool);
-    EXIT_CRITICAL_SECTION();
-
-    return memory;
-}
-```
-
-```c
-memory_pool_status_t memory_pool_free_safe(memory_pool_t *pool,
-                                           void *memory)
-{
-    memory_pool_status_t status;
-
-    ENTER_CRITICAL_SECTION();
-    status = memory_pool_free(pool, memory);
-    EXIT_CRITICAL_SECTION();
-
-    return status;
-}
-```
-
-Critical section chỉ nên bao quanh thao tác trên Pool.
-
-Không thực hiện bên trong critical section:
-
-- `printf()`.
-- Delay.
-- Truyền UART blocking.
-- Xử lý packet dài.
-- Gọi callback không kiểm soát.
-- Chờ semaphore.
-
-## 12.2. ISR cấp phát, Task giải phóng
-
-Mô hình này có hai context cùng thay đổi free list, nên vẫn cần đồng bộ phù hợp.
-
-Các lựa chọn:
-
-- Tắt ngắt trong một đoạn rất ngắn.
-- Dùng primitive `FromISR` của RTOS.
-- Dùng Pool riêng cho ISR.
-- Dùng Single-Producer/Single-Consumer Queue để chuyển index.
-- Thiết kế lock-free có memory ordering rõ ràng.
-
-## 12.3. Với FreeRTOS
-
-Có thể cân nhắc các cơ chế có sẵn:
-
-- Static Queue.
-- Queue.
-- Stream Buffer.
-- Message Buffer.
-- Fixed-size object pool do ứng dụng quản lý.
-- Heap scheme phù hợp của FreeRTOS.
-
-Memory Pool tự viết hữu ích khi:
-
-- Muốn cấp phát object cố định.
-- Muốn kiểm soát chính xác layout.
-- Muốn đo mức sử dụng.
-- Muốn tránh copy payload lớn.
-- Muốn dùng cùng API cả khi có và không có RTOS.
-
-## 12.4. `volatile` không thay thế đồng bộ
-
-`volatile` không tự tạo:
-
-- Atomicity.
-- Critical Section.
-- Mutex.
-- Memory ownership.
-- Memory barrier đầy đủ.
-- Bảo vệ khỏi Double Free.
-
-Không nên chỉ thêm `volatile` vào `free_list` và kết luận Pool đã an toàn.
+Đây là thao tác xóa Node đầu của Singly Linked List.
 
 ---
 
-## 13. Alignment và kích thước block
+## 8.3. Giải phóng một block
 
-## 13.1. Tại sao alignment quan trọng?
+```c
+block->next = pool->free_list;
+pool->free_list = block;
+```
 
-Một object như:
+Minh họa:
+
+```text
+Trước:
+
+free_list
+    |
+    v
+   B1 -> B2 -> NULL
+
+block -> B0
+```
+
+Sau khi trả `B0`:
+
+```text
+free_list
+    |
+    v
+   B0 -> B1 -> B2 -> NULL
+```
+
+Đây là thao tác thêm Node vào đầu Singly Linked List.
+
+---
+
+## 8.4. Tại sao thêm và xóa ở đầu free list?
+
+Nếu luôn thao tác ở đầu danh sách:
+
+```text
+Allocate: remove front
+Free:     insert front
+```
+
+Cả hai thao tác không cần duyệt toàn bộ danh sách.
+
+Do đó thời gian cơ bản là:
+
+```text
+O(1)
+```
+
+---
+
+## 8.5. Kiểm tra block thuộc pool
+
+Không nên nhận mọi địa chỉ từ người dùng rồi đưa vào free list.
+
+Ví dụ nguy hiểm:
+
+```c
+int local_variable;
+MemoryPool_Free(&pool, (MemoryPoolBlock *)&local_variable);
+```
+
+Nếu không kiểm tra, free list có thể chứa địa chỉ không thuộc vùng storage.
+
+Hàm `MemoryPool_Owns()` kiểm tra:
+
+1. Địa chỉ nằm trong khoảng của mảng pool.
+2. Địa chỉ trùng đúng vị trí bắt đầu của một block.
+
+---
+
+## 8.6. Phát hiện double free
+
+Double free xảy ra khi cùng một block được trả lại pool nhiều lần:
+
+```c
+MemoryPool_Free(&pool, block);
+MemoryPool_Free(&pool, block);
+```
+
+Nếu không phát hiện, free list có thể tạo cycle:
+
+```text
+B0 -> B1 -> B0 -> B1 -> ...
+```
+
+Code mẫu duyệt free list trước khi thêm block để phát hiện trường hợp đơn giản này.
+
+Việc kiểm tra có độ phức tạp `O(n)`. Trong hệ thống yêu cầu hiệu năng cao, có thể thay bằng:
+
+- Mảng trạng thái cho từng block.
+- Bitmap allocation.
+- Magic number.
+- Debug build có kiểm tra, release build bỏ kiểm tra.
+- Quy tắc ownership chặt chẽ.
+- Wrapper object có trường state.
+
+---
+
+## 9. Ứng dụng trong hệ thống nhúng
+
+## 9.1. Hệ thống thời gian thực
+
+Memory Pool giúp hệ thống có một số lượng object đã được xác định trước.
+
+Ví dụ:
+
+```text
+Pool có 32 Event
+→ Hệ thống không thể có quá 32 Event đang tồn tại đồng thời
+```
+
+Giới hạn này cho phép:
+
+- Ước lượng RAM từ lúc compile.
+- Phát hiện rõ trường hợp quá tải.
+- Tránh phụ thuộc vào trạng thái phân mảnh của Heap.
+- Giảm biến thiên thời gian cấp phát.
+
+Memory Pool thường kết hợp với:
+
+- Active Object.
+- Event Queue.
+- RTOS Queue.
+- Message Passing.
+- Publish–Subscribe.
+- State Machine.
+- Timer Event.
+
+---
+
+## 9.2. Giao tiếp giữa các Task
+
+Ví dụ:
+
+```text
+Task Sensor
+    |
+    | Allocate Message
+    v
+Message Pool
+    |
+    | Push pointer
+    v
+Message Queue
+    |
+    | Pop pointer
+    v
+Task Communication
+    |
+    | Process and Free
+    v
+Message Pool
+```
+
+Queue chỉ cần truyền con trỏ:
+
+```c
+MemoryPoolBlock *
+```
+
+Thay vì copy toàn bộ payload nhiều lần.
+
+Cần đảm bảo chỉ một thành phần sở hữu block tại mỗi thời điểm.
+
+---
+
+## 9.3. Packet Buffer
+
+Các giao thức truyền thông thường phải xử lý nhiều packet:
+
+- Ethernet.
+- Wi-Fi.
+- BLE.
+- TCP/IP.
+- CAN Transport Protocol.
+- UART framing.
+- USB.
+- SPI packet.
+
+Buffer Pool có thể chuẩn bị trước một số packet buffer có kích thước cố định.
+
+Ưu điểm:
+
+- Tái sử dụng buffer.
+- Không cần cấp phát Heap cho mỗi packet.
+- Dễ đặt giới hạn số packet đang chờ.
+- Dễ theo dõi mức sử dụng.
+
+---
+
+## 9.4. Driver và DMA
+
+Một driver có thể sử dụng nhiều buffer:
+
+```text
+Buffer đang được DMA ghi
+Buffer đang chờ xử lý
+Buffer đang được ứng dụng đọc
+Buffer đang trống
+```
+
+Memory Pool có thể quản lý các buffer trống.
+
+Ví dụ:
+
+```text
+Free Pool -> DMA RX -> Processing Queue -> Application -> Free Pool
+```
+
+---
+
+## 9.5. Object Pool
+
+Nếu ứng dụng thường xuyên tạo cùng một loại object:
 
 ```c
 typedef struct
 {
     uint32_t timestamp;
-    double value;
-} sample_t;
+    uint16_t id;
+    uint8_t state;
+} DeviceEvent;
 ```
 
-có thể yêu cầu địa chỉ được căn chỉnh theo 4, 8 hoặc số byte khác tùy kiến trúc.
+Có thể tạo pool riêng:
 
-Nếu trả về một địa chỉ không đủ alignment, hệ thống có thể:
+```text
+DeviceEvent Pool
+```
 
-- Chạy chậm hơn.
-- Gây Bus Fault.
-- Có hành vi không xác định theo C.
-- Không thể dùng cho DMA.
+Pool này chỉ chứa `DeviceEvent`, nhờ đó:
 
-Bản triển khai dùng:
+- Không cần ép kiểu payload.
+- Kích thước mỗi block đúng bằng object.
+- API rõ ràng hơn.
+- Giảm lãng phí bộ nhớ.
+
+---
+
+## 9.6. Quản lý bộ nhớ tĩnh giống Heap
+
+Từ ý tưởng:
+
+```text
+Static memory + free list
+```
+
+có thể xây dựng allocator phức tạp hơn:
+
+- Nhiều pool với nhiều kích thước block.
+- Fixed-block allocator.
+- Slab allocator.
+- Segregated free lists.
+- Buddy allocator.
+- TLSF.
+- Region allocator.
+
+Memory Pool đơn giản là nền tảng để hiểu các cơ chế quản lý bộ nhớ này.
+
+---
+
+## 10. Critical Section và truy cập đồng thời
+
+Các thao tác sau thay đổi free list:
 
 ```c
-typedef union
+pool->free_list = pool->free_list->next;
+```
+
+và:
+
+```c
+block->next = pool->free_list;
+pool->free_list = block;
+```
+
+Nếu hai ngữ cảnh thực thi cùng thao tác tại một thời điểm, danh sách có thể bị hỏng.
+
+Ví dụ:
+
+- ISR và `main()`.
+- Hai RTOS Task.
+- Hai core.
+- Một task và callback.
+- Một producer và nhiều consumer.
+
+---
+
+## 10.1. Bare-metal Critical Section
+
+Ví dụ khái quát:
+
+```c
+MemoryPoolBlock *MemoryPool_AllocateSafe(MemoryPool *pool)
 {
-    max_align_t alignment;
-    uint8_t bytes[MEMORY_POOL_PAYLOAD_SIZE];
-} memory_pool_payload_t;
+    MemoryPoolBlock *block;
+
+    uint32_t interrupt_state = Platform_EnterCritical();
+
+    block = MemoryPool_Allocate(pool);
+
+    Platform_ExitCritical(interrupt_state);
+
+    return block;
+}
 ```
 
-để payload được căn chỉnh phù hợp với các kiểu dữ liệu thông thường.
-
-## 13.2. Kiểm tra object có vừa block
-
-Dùng `_Static_assert`:
+Giải phóng:
 
 ```c
-_Static_assert(sizeof(event_t) <= MEMORY_POOL_PAYLOAD_SIZE,
-               "event_t is too large");
+bool MemoryPool_FreeSafe(
+    MemoryPool *pool,
+    MemoryPoolBlock *block
+)
+{
+    bool result;
+
+    uint32_t interrupt_state = Platform_EnterCritical();
+
+    result = MemoryPool_Free(pool, block);
+
+    Platform_ExitCritical(interrupt_state);
+
+    return result;
+}
 ```
 
-Nếu object có yêu cầu alignment đặc biệt, cũng cần kiểm tra:
+Critical section phải ngắn.
 
-```c
-_Static_assert(_Alignof(event_t) <= _Alignof(memory_pool_payload_t),
-               "event_t alignment is not supported");
-```
+Không nên:
 
-## 13.3. Alignment cho DMA
-
-DMA có thể yêu cầu:
-
-- Địa chỉ căn 4, 8, 16 hoặc 32 byte.
-- Buffer nằm trong vùng RAM cụ thể.
-- Không nằm trong CCM/DTCM tùy MCU.
-- Cache maintenance trên Cortex-M7 hoặc MCU có D-Cache.
-- Section linker riêng.
-
-Ví dụ GCC:
-
-```c
-__attribute__((aligned(32)))
-static memory_pool_t dma_pool;
-```
-
-Hoặc đặt vào section:
-
-```c
-__attribute__((section(".dma_buffer")))
-static memory_pool_t dma_pool;
-```
-
-Yêu cầu cụ thể phụ thuộc MCU, DMA và linker script.
+- Xóa dữ liệu lớn trong critical section.
+- In log bằng UART trong critical section.
+- Chờ mutex hoặc delay trong critical section.
+- Thực hiện thuật toán dài trong khi interrupt bị khóa.
 
 ---
 
-## 14. Fragmentation
+## 10.2. RTOS Mutex
 
-## 14.1. External Fragmentation
+Trong task context:
 
-Fixed-block Pool không có phân mảnh ngoài bên trong Pool vì mọi block có cùng kích thước.
+```c
+Mutex_Lock(&pool_mutex);
 
-Bất kỳ block rảnh nào cũng đáp ứng một yêu cầu hợp lệ.
+block = MemoryPool_Allocate(&pool);
 
-## 14.2. Internal Fragmentation
-
-Nếu payload là 32 byte nhưng object chỉ cần 5 byte:
-
-```text
-Sử dụng: 5 byte
-Lãng phí nội bộ: 27 byte
+Mutex_Unlock(&pool_mutex);
 ```
 
-Đây là Internal Fragmentation.
-
-## 14.3. Giảm Internal Fragmentation bằng Size Class
-
-Có thể tạo nhiều Pool:
-
-```text
-Pool nhỏ:   16 byte
-Pool vừa:   32 byte
-Pool lớn:  128 byte
-```
-
-Yêu cầu được chuyển đến Pool nhỏ nhất đủ chứa object.
-
-```text
-5 byte   -> Pool 16
-24 byte  -> Pool 32
-90 byte  -> Pool 128
-```
-
-Cách này gần với Slab Allocator hoặc Segregated Free Lists.
-
-Đổi lại:
-
-- Code phức tạp hơn.
-- Có thể một Pool hết block trong khi Pool khác còn trống.
-- Cần chính sách chọn Pool.
-- Cần lưu thông tin Pool sở hữu block.
+Không nên dùng mutex thông thường trong ISR nếu RTOS không cho phép.
 
 ---
 
-## 15. Các lỗi thường gặp
+## 10.3. API dành cho ISR
 
-## 15.1. Không xử lý khi Pool cạn
+Một số hệ thống thiết kế API riêng:
+
+```c
+MemoryPool_AllocateFromISR();
+MemoryPool_FreeFromISR();
+```
+
+API này phải tuân thủ quy tắc của RTOS hoặc MCU đang sử dụng.
+
+---
+
+## 10.4. `volatile` không đủ
+
+Khai báo:
+
+```c
+volatile MemoryPoolBlock *free_list;
+```
+
+không làm thao tác cập nhật linked list trở thành atomic.
+
+`volatile` chỉ liên quan đến cách compiler truy cập biến. Nó không thay thế:
+
+- Critical section.
+- Mutex.
+- Atomic operation.
+- Spinlock.
+- Quy tắc single-owner.
+
+---
+
+## 11. Giám sát Memory Pool
+
+Một pool trong sản phẩm thực tế nên cung cấp thông tin thống kê.
+
+### Số block trống
+
+```c
+MemoryPool_GetFreeCount(&pool);
+```
+
+### Số block đang dùng
+
+```c
+MemoryPool_GetUsedCount(&pool);
+```
+
+### Mức sử dụng cao nhất
+
+```c
+MemoryPool_GetHighWaterMark(&pool);
+```
+
+Ví dụ:
+
+```text
+capacity           = 16
+minimum_free_count = 3
+```
+
+Mức sử dụng đồng thời cao nhất:
+
+```text
+16 - 3 = 13 block
+```
+
+Tỷ lệ sử dụng cao nhất:
+
+```text
+13 / 16 × 100% = 81.25%
+```
+
+---
+
+## 11.1. Pool Exhaustion Counter
+
+Có thể thêm:
+
+```c
+size_t allocation_failure_count;
+```
+
+Mỗi khi pool hết block:
+
+```c
+pool->allocation_failure_count++;
+```
+
+Thông tin này giúp xác định:
+
+- Pool có quá nhỏ không.
+- Consumer có xử lý quá chậm không.
+- Có memory leak logic không.
+- Hệ thống có bị burst dữ liệu không.
+
+---
+
+## 11.2. Allocation Counter
+
+Có thể theo dõi:
+
+```c
+size_t total_allocation_count;
+size_t total_free_count;
+```
+
+Nếu sau một chu kỳ hoạt động:
+
+```text
+total_allocation_count > total_free_count
+```
+
+không nhất thiết là lỗi vì có thể vẫn còn block đang sử dụng.
+
+Nhưng phải thỏa mãn:
+
+```text
+used_count =
+total_allocation_count - total_free_count
+```
+
+khi không có reset hoặc lỗi thống kê.
+
+---
+
+## 11.3. Debug State
+
+Trong debug build, mỗi block có thể có trạng thái:
+
+```c
+typedef enum
+{
+    BLOCK_STATE_FREE = 0,
+    BLOCK_STATE_ALLOCATED
+} BlockState;
+```
+
+Hoặc magic number:
+
+```c
+#define BLOCK_MAGIC_FREE         0xFEEEFEEEU
+#define BLOCK_MAGIC_ALLOCATED    0xA110CA7EU
+```
+
+Nhờ đó có thể phát hiện:
+
+- Double free.
+- Free block chưa từng cấp phát.
+- Ghi tràn làm hỏng metadata.
+- Block bị sử dụng sau khi đã trả pool.
+
+---
+
+## 12. Memory Pool và Heap
+
+| Tiêu chí | Memory Pool | Heap với `malloc/free` |
+|---|---|---|
+| Vùng nhớ | Chuẩn bị trước | Quản lý động |
+| Kích thước object | Thường cố định | Linh hoạt |
+| Thời gian cấp phát | Dễ dự đoán | Có thể thay đổi |
+| Phân mảnh ngoài | Hầu như không với fixed block | Có thể xảy ra |
+| Giới hạn số object | Rõ ràng | Phụ thuộc Heap |
+| Lãng phí nội bộ | Có thể có | Tùy allocator |
+| Giải phóng | Trả block về pool | Trả vùng nhớ về Heap |
+| Kiểm soát RAM | Cao | Khó hơn |
+| Phù hợp ISR | Chỉ khi thiết kế an toàn | Thường không nên |
+| Tính linh hoạt | Thấp hơn | Cao |
+| Độ phức tạp triển khai | Thấp với fixed block | Đã có sẵn trong C Library |
+
+---
+
+## 12.1. Internal Fragmentation
+
+Nếu mỗi block có 32 byte nhưng ứng dụng chỉ lưu 5 byte:
+
+```text
+Lãng phí trong block = 32 - 5 = 27 byte
+```
+
+Đây là **internal fragmentation**.
+
+Có thể giảm bằng cách tạo nhiều pool:
+
+```text
+Pool nhỏ:  16 byte/block
+Pool vừa:  32 byte/block
+Pool lớn: 128 byte/block
+```
+
+Allocator chọn pool phù hợp với kích thước yêu cầu.
+
+---
+
+## 12.2. External Fragmentation
+
+Với các block cố định và được tái sử dụng nguyên khối, Memory Pool không phải tìm vùng nhớ liên tiếp có kích thước thay đổi.
+
+Do đó hiện tượng các lỗ trống nhỏ nằm rải rác như Heap thông thường được hạn chế đáng kể.
+
+---
+
+## 12.3. Khi nào vẫn nên dùng Heap?
+
+Heap có thể phù hợp khi:
+
+- Kích thước object thay đổi nhiều.
+- Số object khó xác định trước.
+- Hệ thống có nhiều RAM.
+- Không có yêu cầu thời gian thực nghiêm ngặt.
+- Thời gian cấp phát không phải vấn đề.
+- Nền tảng có allocator đáng tin cậy.
+- Ứng dụng chạy trên PC, Linux hoặc hệ điều hành đầy đủ.
+
+Memory Pool và Heap không loại trừ lẫn nhau. Một hệ thống có thể dùng:
+
+```text
+Memory Pool cho object quan trọng/thời gian thực
+Heap cho chức năng ít quan trọng hoặc khởi tạo
+```
+
+---
+
+## 13. Độ phức tạp
+
+Với free list đơn:
+
+| Thao tác | Độ phức tạp |
+|---|---:|
+| Khởi tạo pool | `O(n)` |
+| Cấp phát block | `O(1)` |
+| Trả block | `O(1)` |
+| Kiểm tra hết pool | `O(1)` |
+| Lấy số block trống | `O(1)` |
+| Lấy số block đang dùng | `O(1)` |
+| Reset pool | `O(n)` |
+| Kiểm tra double free bằng duyệt list | `O(n)` |
+| Kiểm tra ownership theo địa chỉ | `O(1)` |
+
+Trong đó `n` là số block trong pool.
+
+### Bộ nhớ
+
+Pool cần:
+
+```text
+capacity × sizeof(MemoryPoolBlock)
+```
+
+Ngoài dữ liệu ứng dụng, mỗi block cần metadata như con trỏ `next`.
+
+Trên MCU 32-bit:
+
+```text
+sizeof(next) = 4 byte
+```
+
+Với payload 32 byte, một block có thể cần ít nhất:
+
+```text
+4 + 32 = 36 byte
+```
+
+Kích thước thực tế có thể lớn hơn do alignment.
+
+---
+
+## 14. Ưu điểm và hạn chế
+
+## 14.1. Ưu điểm
+
+- Bộ nhớ tối đa được biết trước.
+- Thời gian cấp phát thường ngắn và dễ dự đoán.
+- Cấp phát và giải phóng cơ bản là `O(1)`.
+- Tái sử dụng object nhiều lần.
+- Hạn chế phân mảnh ngoài.
+- Phù hợp với message, event, packet và buffer.
+- Dễ theo dõi số block trống và đang dùng.
+- Có thể hoạt động mà không cần Heap.
+- Có thể dùng trong bare-metal và RTOS.
+- Thuận tiện cho thiết kế producer–consumer.
+
+---
+
+## 14.2. Hạn chế
+
+- Số block tối đa cố định.
+- Pool có thể hết khi hệ thống bị burst.
+- Các block cùng kích thước có thể gây lãng phí RAM.
+- Không phù hợp với object có kích thước quá khác nhau.
+- Cần quản lý ownership rõ ràng.
+- Có thể bị double free hoặc use-after-free.
+- Cần bảo vệ khi nhiều ngữ cảnh truy cập.
+- Việc chọn capacity quá nhỏ hoặc quá lớn đều gây vấn đề.
+- Reset pool có thể làm vô hiệu các con trỏ đang được sử dụng.
+
+---
+
+## 15. Lỗi thường gặp
+
+## 15.1. Dereference khi Pool rỗng
 
 Sai:
 
 ```c
-event_t *event = memory_pool_alloc(&pool);
-event->signal = EVENT_TIMEOUT;
+MemoryPoolBlock *block = pool->free_list;
+
+pool->free_list = block->next;
 ```
 
-Nếu Pool hết block, `event == NULL`.
+Nếu `free_list == NULL`, câu lệnh `block->next` gây lỗi.
 
 Đúng:
 
 ```c
-event_t *event = memory_pool_alloc(&pool);
-
-if (event == NULL)
+if (pool->free_list == NULL)
 {
-    handle_pool_exhaustion();
-    return;
+    return NULL;
 }
 ```
 
-## 15.2. Trả con trỏ không thuộc Pool
+---
 
-```c
-int local_value;
-memory_pool_free(&pool, &local_value);
-```
-
-Bản triển khai an toàn trả về:
-
-```text
-MEMORY_POOL_POINTER_OUT_OF_RANGE
-```
-
-## 15.3. Trả con trỏ nằm giữa payload
+## 15.2. Không kiểm tra kết quả cấp phát
 
 Sai:
 
 ```c
-uint8_t *memory = memory_pool_alloc(&pool);
-memory_pool_free(&pool, &memory[4]);
+MemoryPoolBlock *block = MemoryPool_Allocate(&pool);
+block->data[0] = 10U;
 ```
 
-Chỉ con trỏ đúng đầu payload mới hợp lệ.
-
-## 15.4. Double Free
+Đúng:
 
 ```c
-memory_pool_free(&pool, event);
-memory_pool_free(&pool, event);
+MemoryPoolBlock *block = MemoryPool_Allocate(&pool);
+
+if (block != NULL)
+{
+    block->data[0] = 10U;
+}
 ```
-
-Nếu không phát hiện, cùng một block có thể xuất hiện hai lần trong free list:
-
-```text
-Block A -> ... -> Block A -> ...
-```
-
-Điều này có thể làm hai lần cấp phát sau trả về cùng một vùng nhớ.
-
-## 15.5. Use-After-Free
-
-Sai:
-
-```c
-memory_pool_free(&pool, event);
-event->signal = EVENT_TIMEOUT;
-```
-
-Sau `free`, quyền sở hữu đã trả cho Pool. Block có thể được cấp cho thành phần khác.
-
-## 15.6. Object lớn hơn block
-
-Ép kiểu không làm object tự vừa vào block.
-
-```c
-large_packet_t *packet =
-    (large_packet_t *)memory_pool_alloc(&pool);
-```
-
-Nếu `sizeof(large_packet_t) > MEMORY_POOL_PAYLOAD_SIZE`, thao tác ghi sẽ phá hỏng block kế tiếp hoặc metadata.
-
-Luôn dùng `_Static_assert`.
-
-## 15.7. Không đồng bộ giữa ISR và Task
-
-Free list là Linked List dùng chung. Cập nhật không nguyên tử có thể làm mất block hoặc tạo chu trình.
-
-## 15.8. Khởi tạo lại khi còn object đang dùng
-
-```c
-memory_pool_init(&pool);
-```
-
-trong khi caller vẫn giữ con trỏ cũ sẽ đưa mọi block về trạng thái free, tạo alias và hỏng ownership.
-
-Chỉ reinitialize Pool khi chắc chắn không còn object đang dùng.
-
-## 15.9. Ghi vượt payload
-
-Memory Pool chỉ quản lý block, không tự biết caller ghi bao nhiêu byte.
-
-```c
-memcpy(memory, source, length);
-```
-
-phải bảo đảm:
-
-```c
-length <= MEMORY_POOL_PAYLOAD_SIZE
-```
-
-## 15.10. Xóa dữ liệu nhạy cảm không đầy đủ
-
-Nếu block chứa key hoặc credential, có thể cần xóa dữ liệu khi giải phóng thay vì khi cấp phát.
-
-Lưu ý compiler có thể tối ưu bỏ một số lần `memset()` nếu kết quả không được quan sát. Với dữ liệu bảo mật, dùng hàm xóa an toàn do nền tảng cung cấp.
 
 ---
 
-## 16. Giám sát và kiểm thử
+## 15.3. Double free
 
-## 16.1. Các chỉ số nên theo dõi
+Sai:
 
-- Tổng số block.
-- Số block đang rảnh.
-- Số block đang dùng.
-- Mức sử dụng lớn nhất.
-- Số lần cấp phát thất bại.
-- Số Double Free.
-- Số con trỏ không hợp lệ.
-- Thời gian giữ block trung bình nếu cần.
-- Owner hiện tại trong bản debug.
+```c
+MemoryPool_Free(&pool, block);
+MemoryPool_Free(&pool, block);
+```
 
-Có thể bổ sung:
+Một block chỉ được trả pool đúng một lần sau mỗi lần cấp phát.
+
+Sau khi free, nên xóa con trỏ phía người dùng:
+
+```c
+MemoryPool_Free(&pool, block);
+block = NULL;
+```
+
+---
+
+## 15.4. Use-after-free
+
+Sai:
+
+```c
+MemoryPool_Free(&pool, block);
+
+block->data[0] = 0x55U;
+```
+
+Sau khi được trả pool, block có thể được cấp cho thành phần khác.
+
+---
+
+## 15.5. Free con trỏ không thuộc Pool
+
+Sai:
+
+```c
+MemoryPoolBlock local_block;
+
+MemoryPool_Free(&pool, &local_block);
+```
+
+Pool chỉ được nhận lại block do chính pool đó cấp.
+
+---
+
+## 15.6. Tràn payload
+
+Sai:
+
+```c
+memcpy(block->data, source, 100U);
+```
+
+Trong khi:
+
+```text
+sizeof(block->data) = 32
+```
+
+Đúng:
+
+```c
+if (source_length <= sizeof(block->data))
+{
+    memcpy(block->data, source, source_length);
+}
+```
+
+---
+
+## 15.7. Quên trả block
+
+```c
+block = MemoryPool_Allocate(&pool);
+
+/* Process data. */
+
+/* Missing MemoryPool_Free(). */
+```
+
+Nếu lặp lại, pool sẽ dần hết block dù chương trình không dùng Heap.
+
+Đây là một dạng resource leak.
+
+---
+
+## 15.8. Một block có nhiều owner
+
+Nguy hiểm:
+
+```text
+Producer giữ block
+Queue giữ block
+Consumer giữ block
+```
+
+Nếu một thành phần giải phóng trong khi thành phần khác còn sử dụng, xảy ra use-after-free.
+
+Nên quy định:
+
+```text
+Mỗi thời điểm chỉ có một owner chịu trách nhiệm giải phóng block
+```
+
+Hoặc dùng reference counting nếu thực sự cần chia sẻ.
+
+---
+
+## 15.9. Gọi reset khi còn block đang dùng
+
+```c
+MemoryPool_Reset(&pool);
+```
+
+sẽ đưa toàn bộ block về free list.
+
+Mọi con trỏ đã cấp phát trước đó trở thành không hợp lệ về mặt ownership, dù địa chỉ vẫn còn tồn tại trong RAM.
+
+Chỉ reset khi chắc chắn không còn người dùng nào giữ block.
+
+---
+
+## 16. Hướng mở rộng
+
+## 16.1. Generic Memory Pool
+
+Thay vì cố định kiểu `MemoryPoolBlock`, có thể nhận:
+
+```text
+storage pointer
+block size
+block count
+```
+
+Ví dụ API:
+
+```c
+bool GenericPool_Init(
+    GenericPool *pool,
+    void *storage,
+    size_t block_size,
+    size_t block_count
+);
+```
+
+Điều kiện:
+
+```text
+block_size >= sizeof(void *)
+```
+
+vì mỗi block trống cần chứa liên kết `next`.
+
+---
+
+## 16.2. Nhiều kích thước block
+
+```text
+Small Pool  -> 16-byte blocks
+Medium Pool -> 64-byte blocks
+Large Pool  -> 256-byte blocks
+```
+
+Yêu cầu 40 byte sẽ chọn Medium Pool.
+
+Cách này giảm internal fragmentation so với chỉ có một block size lớn.
+
+---
+
+## 16.3. Bitmap Pool
+
+Thay vì free list, dùng bitmap:
+
+```text
+0 = free
+1 = allocated
+```
+
+Ví dụ 8 block:
+
+```text
+Bitmap: 0 1 1 0 0 1 0 0
+```
+
+Ưu điểm:
+
+- Dễ kiểm tra double free.
+- Metadata tách khỏi payload.
+- Dễ duyệt trạng thái.
+
+Nhược điểm:
+
+- Tìm block trống có thể phải quét bitmap.
+- Cần tối ưu bằng bit operation nếu pool lớn.
+
+---
+
+## 16.4. Reference Counting
+
+Nếu nhiều module cùng sử dụng một block:
 
 ```c
 typedef struct
 {
-    size_t allocation_count;
-    size_t free_count_total;
-    size_t allocation_failure_count;
-    size_t invalid_free_count;
-    size_t double_free_count;
-} memory_pool_statistics_t;
+    uint16_t reference_count;
+    uint8_t data[...];
+} SharedBlock;
 ```
 
-## 16.2. Unit Test
-
-### `test_memory_pool.c`
+Khi chia sẻ:
 
 ```c
-#include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
-
-#include "memory_pool.h"
-
-static void test_initial_state(void)
-{
-    memory_pool_t pool;
-
-    assert(memory_pool_init(&pool) == MEMORY_POOL_OK);
-    assert(memory_pool_capacity(&pool) == MEMORY_POOL_BLOCK_COUNT);
-    assert(memory_pool_free_count(&pool) == MEMORY_POOL_BLOCK_COUNT);
-    assert(memory_pool_used_count(&pool) == 0U);
-    assert(memory_pool_is_full(&pool));
-    assert(!memory_pool_is_empty(&pool));
-}
-
-static void test_allocate_and_free(void)
-{
-    memory_pool_t pool;
-    void *memory;
-
-    assert(memory_pool_init(&pool) == MEMORY_POOL_OK);
-
-    memory = memory_pool_alloc(&pool);
-
-    assert(memory != NULL);
-    assert(memory_pool_owns(&pool, memory));
-    assert(memory_pool_free_count(&pool) ==
-           (MEMORY_POOL_BLOCK_COUNT - 1U));
-    assert(memory_pool_used_count(&pool) == 1U);
-
-    assert(memory_pool_free(&pool, memory) == MEMORY_POOL_OK);
-    assert(memory_pool_free_count(&pool) == MEMORY_POOL_BLOCK_COUNT);
-}
-
-static void test_exhaustion(void)
-{
-    memory_pool_t pool;
-    void *objects[MEMORY_POOL_BLOCK_COUNT];
-    size_t index;
-
-    assert(memory_pool_init(&pool) == MEMORY_POOL_OK);
-
-    for (index = 0U; index < MEMORY_POOL_BLOCK_COUNT; index++)
-    {
-        objects[index] = memory_pool_alloc(&pool);
-        assert(objects[index] != NULL);
-    }
-
-    assert(memory_pool_is_empty(&pool));
-    assert(memory_pool_alloc(&pool) == NULL);
-    assert(memory_pool_maximum_used(&pool) ==
-           MEMORY_POOL_BLOCK_COUNT);
-
-    for (index = 0U; index < MEMORY_POOL_BLOCK_COUNT; index++)
-    {
-        assert(memory_pool_free(&pool, objects[index]) ==
-               MEMORY_POOL_OK);
-    }
-
-    assert(memory_pool_is_full(&pool));
-}
-
-static void test_double_free(void)
-{
-    memory_pool_t pool;
-    void *memory;
-
-    assert(memory_pool_init(&pool) == MEMORY_POOL_OK);
-
-    memory = memory_pool_alloc(&pool);
-    assert(memory != NULL);
-
-    assert(memory_pool_free(&pool, memory) == MEMORY_POOL_OK);
-    assert(memory_pool_free(&pool, memory) ==
-           MEMORY_POOL_DOUBLE_FREE);
-}
-
-static void test_invalid_pointer(void)
-{
-    memory_pool_t pool;
-    uint32_t external_object = 0U;
-
-    assert(memory_pool_init(&pool) == MEMORY_POOL_OK);
-
-    assert(memory_pool_free(&pool, &external_object) ==
-           MEMORY_POOL_POINTER_OUT_OF_RANGE);
-}
-
-static void test_reuse(void)
-{
-    memory_pool_t pool;
-    void *first;
-    void *second;
-
-    assert(memory_pool_init(&pool) == MEMORY_POOL_OK);
-
-    first = memory_pool_alloc(&pool);
-    assert(first != NULL);
-
-    assert(memory_pool_free(&pool, first) == MEMORY_POOL_OK);
-
-    second = memory_pool_alloc(&pool);
-    assert(second == first);
-}
-
-int main(void)
-{
-    test_initial_state();
-    test_allocate_and_free();
-    test_exhaustion();
-    test_double_free();
-    test_invalid_pointer();
-    test_reuse();
-
-    return 0;
-}
+reference_count++;
 ```
 
-### Biên dịch test
+Khi một owner dùng xong:
 
-```bash
-gcc -std=c11 -Wall -Wextra -Wpedantic \
-    -fsanitize=address,undefined \
-    src/memory_pool.c tests/test_memory_pool.c \
-    -Iinc -o memory_pool_tests
+```c
+reference_count--;
 ```
 
-Chạy:
+Chỉ trả pool khi:
 
-```bash
-./memory_pool_tests
+```c
+reference_count == 0
 ```
 
-## 16.3. Các trường hợp cần kiểm thử thêm
-
-1. Khởi tạo với `NULL`.
-2. Cấp phát trước khi khởi tạo.
-3. Giải phóng `NULL`.
-4. Cấp phát hết toàn bộ Pool.
-5. Giải phóng theo thứ tự khác thứ tự cấp phát.
-6. Cấp phát và giải phóng hàng nghìn vòng.
-7. Double Free.
-8. Con trỏ ngoài Pool.
-9. Con trỏ nằm giữa payload.
-10. Alignment của object.
-11. High-Water Mark.
-12. Truy cập đồng thời giữa các context.
-13. Pool reset khi còn object đang dùng.
-14. Payload lớn nhất bằng đúng block size.
-15. Build trên MCU 32-bit và host 64-bit.
+Cần đồng bộ nếu nhiều task thay đổi reference count.
 
 ---
 
-## 17. Các biến thể của Memory Pool
+## 16.5. Zero-copy Message Passing
 
-## 17.1. Object Pool
-
-Mỗi block chứa đúng một kiểu object:
+Thay vì copy payload qua nhiều queue:
 
 ```text
-Event Pool
-Timer Pool
-Packet Pool
-Node Pool
+Producer tạo block
+→ Queue truyền con trỏ
+→ Consumer đọc trực tiếp block
+→ Consumer trả block
+```
+
+Điều này giảm:
+
+- Số lần copy.
+- Thời gian CPU.
+- RAM tạm thời.
+
+Đổi lại, ownership phải được quản lý rất rõ.
+
+---
+
+## 16.6. Typed Pool
+
+Có thể tạo pool chuyên biệt:
+
+```c
+typedef struct EventBlock
+{
+    struct EventBlock *next;
+    Event event;
+} EventBlock;
 ```
 
 Ưu điểm:
 
-- API rõ ràng.
-- Không cần lưu kích thước yêu cầu.
-- Có thể gọi constructor/init riêng.
-- Dễ kiểm tra kiểu trong bản debug.
+- Không cần ép kiểu `uint8_t data[]`.
+- Compiler kiểm tra kiểu tốt hơn.
+- Kích thước block đúng với object.
+- API dễ đọc.
 
-## 17.2. Buffer Pool
+Ví dụ:
 
-Mỗi block là một buffer byte có cùng kích thước.
-
-Ứng dụng:
-
-- UART frame.
-- CAN-TP payload.
-- Ethernet packet.
-- Audio chunk.
-- Camera line buffer.
-
-## 17.3. Pool theo nhiều Size Class
-
-```text
-16-byte Pool
-32-byte Pool
-64-byte Pool
-128-byte Pool
-```
-
-Giảm lãng phí nội bộ nhưng tăng độ phức tạp.
-
-## 17.4. Bitmap Pool
-
-Không dùng free list; dùng bitmap để đánh dấu block rảnh.
-
-```text
-0 = free
-1 = used
-```
-
-Ưu điểm:
-
-- Metadata nhỏ.
-- Dễ kiểm tra Double Free.
-- Dễ snapshot trạng thái.
-
-Nhược điểm:
-
-- Tìm bit rảnh có thể không còn `O(1)` nếu không có cấu trúc hỗ trợ.
-- Có thể cần thao tác bit nguyên tử.
-
-## 17.5. Lock-Free Pool
-
-Có thể xây dựng free list lock-free bằng atomic compare-and-swap.
-
-Tuy nhiên cần xử lý:
-
-- ABA problem.
-- Memory ordering.
-- Pointer width.
-- ISR priority.
-- Atomic support của MCU.
-- Reclamation và ownership.
-
-Không nên tự viết lock-free allocator cho production nếu chưa có kiểm thử concurrency nghiêm ngặt.
-
-## 17.6. Arena Allocator
-
-Arena cấp phát tuần tự từ một vùng nhớ và giải phóng toàn bộ cùng lúc.
-
-```text
-allocate -> allocate -> allocate -> reset all
-```
-
-Khác Memory Pool:
-
-- Arena không thường giải phóng từng object.
-- Phù hợp các object có cùng vòng đời.
-- Cấp phát rất nhanh.
-- Không tái sử dụng từng block riêng lẻ trước khi reset.
-
-## 17.7. Buddy Allocator
-
-Buddy Allocator chia vùng nhớ thành các block lũy thừa của hai và có thể gộp các buddy khi giải phóng.
-
-Phù hợp yêu cầu kích thước biến đổi hơn Fixed-Block Pool, nhưng phức tạp hơn và vẫn có Internal Fragmentation.
-
----
-
-## 18. Khi nào nên và không nên dùng
-
-## Nên dùng khi
-
-- Object có kích thước cố định hoặc một vài size class.
-- Số object đồng thời có giới hạn rõ.
-- Cần thời gian cấp phát có giới hạn trên.
-- Firmware chạy lâu.
-- Muốn tránh phân mảnh Heap.
-- Cần cấp Event, Message, Packet hoặc Node.
-- Cần theo dõi mức sử dụng.
-- Hệ thống Event-Driven hoặc RTOS.
-- Muốn tránh `malloc()` sau startup.
-
-## Không nên dùng khi
-
-- Kích thước yêu cầu thay đổi rất lớn.
-- Không thể xác định số object tối đa.
-- Object quá lớn và hiếm khi dùng.
-- Cần resize block thường xuyên.
-- Vòng đời object không rõ và ownership lộn xộn.
-- Một mảng tĩnh đơn giản đã đáp ứng yêu cầu.
-- Stack allocation đủ dùng.
-- Hệ điều hành đã cung cấp allocator phù hợp và không có yêu cầu real-time chặt.
-
-## So sánh nhanh
-
-| Tiêu chí | Heap | Fixed-Block Pool | Stack |
-|---|---|---|---|
-| Kích thước object | Linh hoạt | Cố định | Cố định khi vào scope |
-| Thời gian cấp phát | Có thể biến đổi | Thường `O(1)` | Rất nhanh |
-| Giải phóng riêng lẻ | Có | Có | Không |
-| Phân mảnh ngoài | Có thể có | Không trong Pool | Không |
-| Số object tối đa | Theo Heap | Biết trước | Theo Stack |
-| Dùng trong ISR | Thường không nên | Có thể nếu đồng bộ đúng | Biến cục bộ nhỏ |
-| Kiểm soát bộ nhớ | Trung bình | Cao | Cao |
-| Phù hợp real-time | Tùy allocator | Tốt | Tốt |
-
----
-
-## 19. Cấu trúc repository đề xuất
-
-```text
-fixed-block-memory-pool/
-├── README.md
-├── inc/
-│   └── memory_pool.h
-├── src/
-│   └── memory_pool.c
-├── examples/
-│   ├── basic/
-│   │   └── main.c
-│   ├── event_pool/
-│   │   └── event_pool_example.c
-│   ├── packet_pool/
-│   │   └── packet_pool_example.c
-│   └── linked_list_node_pool/
-│       └── node_pool_example.c
-├── tests/
-│   └── test_memory_pool.c
-└── CMakeLists.txt
-```
-
-### `CMakeLists.txt` tối giản
-
-```cmake
-cmake_minimum_required(VERSION 3.16)
-
-project(fixed_block_memory_pool C)
-
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
-
-add_library(memory_pool
-    src/memory_pool.c
-)
-
-target_include_directories(memory_pool
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/inc
-)
-
-target_compile_options(memory_pool
-    PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-)
-
-add_executable(memory_pool_tests
-    tests/test_memory_pool.c
-)
-
-target_link_libraries(memory_pool_tests
-    PRIVATE
-        memory_pool
-)
-```
-
-Build:
-
-```bash
-cmake -S . -B build
-cmake --build build
-./build/memory_pool_tests
+```c
+Event *EventPool_Allocate(void);
+void EventPool_Free(Event *event);
 ```
 
 ---
 
-## 20. Tóm tắt
+## 17. Tổng kết
 
-Các điểm quan trọng cần nhớ:
+Memory Pool là kỹ thuật chuẩn bị trước một vùng nhớ và tái sử dụng các block trong vùng nhớ đó.
 
-- Memory Pool chuẩn bị trước một vùng nhớ cố định.
-- Vùng nhớ được chia thành nhiều block để tái sử dụng.
-- Fixed-Block Pool thường quản lý block rảnh bằng free list.
-- Khởi tạo nối các block thành Singly Linked List.
-- Cấp phát lấy block đầu free list.
-- Giải phóng đưa block trở lại free list.
-- Cấp phát và giải phóng có thể thực hiện trong `O(1)`.
-- Pool không có phân mảnh ngoài bên trong vùng block cố định.
-- Vẫn có Internal Fragmentation nếu object nhỏ hơn block.
-- Cần xử lý rõ trường hợp Pool cạn.
-- Cần kiểm tra object không lớn hơn payload.
-- Cần bảo đảm alignment.
-- Cần xác định ownership của Event, Message và Packet.
-- Pool không tự thread-safe.
-- Thao tác giữa ISR và Task phải được đồng bộ.
-- Không dùng `volatile` thay cho critical section.
-- Nên theo dõi `free_count` và High-Water Mark.
-- Bản debug nên phát hiện con trỏ sai và Double Free.
-- Với nhiều kích thước object, có thể dùng nhiều size class.
-- Memory Pool đặc biệt phù hợp Event-Driven, RTOS, Packet Buffer và Linked List Node.
+Mô hình cơ bản:
+
+```text
+Static Array
+    +
+Singly Linked Free List
+```
+
+Khởi tạo:
+
+```text
+B0 -> B1 -> B2 -> ... -> BN -> NULL
+```
+
+Cấp phát:
+
+```text
+Lấy block đầu khỏi free list
+```
+
+Giải phóng:
+
+```text
+Đưa block trở lại đầu free list
+```
+
+Các thao tác cơ bản:
+
+```text
+Allocate: O(1)
+Free:     O(1)
+```
+
+Memory Pool phù hợp với:
+
+- Event-Driven Architecture.
+- RTOS Message.
+- Packet Buffer.
+- DMA Buffer.
+- Object Pool.
+- Queue truyền con trỏ.
+- Hệ thống yêu cầu bộ nhớ xác định trước.
+- Ứng dụng không muốn phụ thuộc vào Heap trong run-time.
+
+Khi thiết kế cần chú ý:
+
+1. Xử lý khi pool hết block.
+2. Kiểm tra kích thước dữ liệu.
+3. Không dereference con trỏ `NULL`.
+4. Không double free.
+5. Không dùng block sau khi free.
+6. Quy định ownership rõ ràng.
+7. Bảo vệ free list bằng critical section hoặc mutex.
+8. Theo dõi `free_count` và high-water mark.
+9. Chọn số block và kích thước block phù hợp.
+10. Không reset pool khi còn block đang được sử dụng.
 
 ---
 
-## Tài liệu tham khảo
+## 18. Tài liệu tham khảo
 
-README này được biên soạn lại và mở rộng dựa trên chủ đề:
+README này được biên soạn và diễn đạt lại độc lập dựa trên chủ đề được trình bày trong bài:
 
-- [Data Structures - Memory Pool và ứng dụng — AK Embedded Software, EPCB](https://epcb.vn/blogs/ak-embedded-software/pool-memory-va-ung-dung)
+- EPCB — **Data Structures - Memory Pool và ứng dụng**
+- Trang nguồn: <https://epcb.vn/blogs/ak-embedded-software/pool-memory-va-ung-dung>
 
-Nội dung không sao chép nguyên văn bài viết. Phần mã nguồn được thiết kế lại thành một thư viện Fixed-Block Memory Pool độc lập, có bổ sung kiểm tra lỗi, alignment, Double Free detection, thống kê mức sử dụng, unit test và các lưu ý dành cho ISR/RTOS.
+README không phải là bản sao nguyên văn của bài viết nguồn.
