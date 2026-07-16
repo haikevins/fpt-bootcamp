@@ -884,4 +884,7 @@ Khi triển khai trong firmware thực tế, cần xác định rõ:
 
 ## Tài liệu tham khảo
 
-Nội dung được biên soạn độc lập dựa trên chủ đề Ring Buffer và tham khảo bài viết “Data Structures - Ring buffer và ứng dụng” của EPCB.
+Nội dung được biên soạn độc lập dựa trên chủ đề Ring Buffer và tham khảo bài viết:
+- **Data Structures - Ring buffer và ứng dụng, AK Embedded Software, EPCB:
+  https://epcb.vn/blogs/ak-embedded-software/data-structures-ring-buffer-va-ung-dung
+
