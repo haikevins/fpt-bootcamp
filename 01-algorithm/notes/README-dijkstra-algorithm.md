@@ -27,7 +27,7 @@
 19. [So sánh với các thuật toán khác](#19-so-sánh-với-các-thuật-toán-khác)
 20. [Ứng dụng](#20-ứng-dụng)
 21. [Dijkstra trong lập trình nhúng](#21-dijkstra-trong-lập-trình-nhúng)
-22. [Lỗi thường gặp](#22-lỗi-thường-gặp)
+22. [Các lỗi thường gặp](#22-các-lỗi-thường-gặp)
 23. [Bài tập luyện tập](#23-bài-tập-luyện-tập)
 24. [Tổng kết](#24-tổng-kết)
 25. [Tài liệu tham khảo](#25-tài-liệu-tham-khảo)
@@ -1947,7 +1947,7 @@ Cần:
 
 ---
 
-## 22. Lỗi thường gặp
+## 22. Các lỗi thường gặp
 
 ## 22.1. Dùng Dijkstra với cạnh âm
 
