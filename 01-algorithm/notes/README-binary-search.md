@@ -1928,4 +1928,4 @@ Các biến thể cần nắm:
 README này được biên soạn và diễn đạt lại độc lập dựa trên phạm vi chủ đề được trình bày trong:
 
 - GeeksforGeeks — **Binary Search**:  
-  https://www.geeksforgeeks.org/dsa/binary-search/
+  https://www.geeksforgeeks.org/dsa/binary-search/>
