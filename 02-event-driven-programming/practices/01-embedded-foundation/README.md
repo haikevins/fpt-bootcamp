@@ -279,15 +279,3 @@ Firmware root link bằng `-nostdlib` và `-nostartfiles`. Không sử dụng st
 `build/` không được commit, ngoại trừ `.gitkeep`.
 
 ---
-
-## 11. Tiêu chí hoàn thành
-
-- [ ] Build không warning.
-- [ ] Tạo đủ ELF/BIN/HEX/MAP/LST.
-- [ ] LED PC13 nháy.
-- [ ] USART1 gửi banner.
-- [ ] UART echo hoạt động.
-- [ ] Giải thích được `.data` và `.bss` startup.
-- [ ] Đọc được map file.
-- [ ] Xác định được vị trí các section.
-- [ ] Hoàn thành cả tám lab.
