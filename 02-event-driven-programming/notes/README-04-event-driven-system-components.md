@@ -3435,34 +3435,34 @@ Game event truyền qua Data-Link.
 
 # 47. Tiêu chí hoàn thành
 
-- [ ] Giải thích được Active Object.
-- [ ] Thiết kế mailbox.
-- [ ] Viết Event Handler run-to-completion.
-- [ ] Viết scheduler cơ bản.
-- [ ] Hiểu priority và starvation.
-- [ ] Viết Flat State Machine.
-- [ ] Viết Function-Based State Machine.
-- [ ] Viết Table-Driven State Machine.
-- [ ] Giải thích Hierarchical State Machine.
-- [ ] Dùng entry/exit action đúng.
-- [ ] Tạo Event Pool tĩnh.
-- [ ] Quản lý ownership.
-- [ ] Hiểu reference count.
-- [ ] Theo dõi high-water mark.
-- [ ] Xử lý pool exhaustion.
-- [ ] Dùng direct post.
-- [ ] Dùng publish-subscribe.
-- [ ] Thiết kế router.
-- [ ] Thiết kế frame Data-Link.
-- [ ] Serialize và deserialize event.
-- [ ] Kiểm tra CRC.
-- [ ] Dùng sequence number.
-- [ ] Xử lý timeout và retry.
-- [ ] Truyền event qua UART hoặc CAN.
-- [ ] Hoàn thành demo nhiều MCU hoặc nhiều process.
-- [ ] Có unit test và integration test.
-- [ ] Có event trace.
-- [ ] Có tài liệu kiến trúc trên GitHub.
+- Giải thích được Active Object.
+- Thiết kế mailbox.
+- Viết Event Handler run-to-completion.
+- Viết scheduler cơ bản.
+- Hiểu priority và starvation.
+- Viết Flat State Machine.
+- Viết Function-Based State Machine.
+- Viết Table-Driven State Machine.
+- Giải thích Hierarchical State Machine.
+- Dùng entry/exit action đúng.
+- Tạo Event Pool tĩnh.
+- Quản lý ownership.
+- Hiểu reference count.
+- Theo dõi high-water mark.
+- Xử lý pool exhaustion.
+- Dùng direct post.
+- Dùng publish-subscribe.
+- Thiết kế router.
+- Thiết kế frame Data-Link.
+- Serialize và deserialize event.
+- Kiểm tra CRC.
+- Dùng sequence number.
+- Xử lý timeout và retry.
+- Truyền event qua UART hoặc CAN.
+- Hoàn thành demo nhiều MCU hoặc nhiều process.
+- Có unit test và integration test.
+- Có event trace.
+- Có tài liệu kiến trúc trên GitHub.
 
 ---
 
