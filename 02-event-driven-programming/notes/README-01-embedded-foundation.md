@@ -1161,6 +1161,29 @@ Mục tiêu:
 
 ### Project tổng kết
 
+Cấu trúc thư mục:
+01-embedded-foundation/
+├── README.md
+├── Makefile
+├── .gitignore
+├── linker/
+│   └── memory.ld
+├── startup/
+│   └── startup.c
+├── src/
+│   ├── main.c
+│   ├── gpio.c
+│   └── uart.c
+├── include/
+│   ├── gpio.h
+│   └── uart.h
+├── docs/
+│   ├── memory-map.md
+│   ├── startup-flow.md
+│   ├── sections-analysis.md
+│   └── map-analysis.md
+└── build/
+
 ---
 
 ## 15. Lỗi thường gặp
