@@ -3059,32 +3059,32 @@ Yêu cầu:
 
 # 37. Tiêu chí hoàn thành
 
-- [ ] Giải thích được Active Kernel.
-- [ ] Phân biệt AK với RTOS preemptive.
-- [ ] Hiểu run-to-completion.
-- [ ] Tạo được `app_task_table`.
-- [ ] Chọn được task priority hợp lý.
-- [ ] Định nghĩa signal rõ ràng.
-- [ ] Gửi được Pure Message.
-- [ ] Gửi được Common Message.
-- [ ] Gửi được Dynamic Message.
-- [ ] Kiểm tra payload length.
-- [ ] Hiểu message pool.
-- [ ] Theo dõi pool high-water mark.
-- [ ] Hiểu reference count.
-- [ ] Không giữ pointer message sai lifetime.
-- [ ] Tạo được one-shot timer.
-- [ ] Tạo được periodic timer.
-- [ ] Remove timer khi không dùng.
-- [ ] Viết được FSM.
-- [ ] Viết được TSM.
-- [ ] ISR chỉ làm xử lý tối thiểu.
-- [ ] Biết sử dụng `task_entry_interrupt()` và `task_exit_interrupt()`.
-- [ ] Tạo được shell command.
-- [ ] Tạo được event trace.
-- [ ] Ghi được fatal record.
-- [ ] Hoàn thành project demo chạy ổn định.
-- [ ] Có tài liệu kiến trúc và signal list trên GitHub.
+- Giải thích được Active Kernel.
+- Phân biệt AK với RTOS preemptive.
+- Hiểu run-to-completion.
+- Tạo được `app_task_table`.
+- Chọn được task priority hợp lý.
+- Định nghĩa signal rõ ràng.
+- Gửi được Pure Message.
+- Gửi được Common Message.
+- Gửi được Dynamic Message.
+- Kiểm tra payload length.
+- Hiểu message pool.
+- Theo dõi pool high-water mark.
+- Hiểu reference count.
+- Không giữ pointer message sai lifetime.
+- Tạo được one-shot timer.
+- Tạo được periodic timer.
+- Remove timer khi không dùng.
+- Viết được FSM.
+- Viết được TSM.
+- ISR chỉ làm xử lý tối thiểu.
+- Biết sử dụng `task_entry_interrupt()` và `task_exit_interrupt()`.
+- Tạo được shell command.
+- Tạo được event trace.
+- Ghi được fatal record.
+- Hoàn thành project demo chạy ổn định.
+- Có tài liệu kiến trúc và signal list trên GitHub.
 
 ---
 
