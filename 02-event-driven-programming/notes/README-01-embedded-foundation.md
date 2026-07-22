@@ -1162,6 +1162,7 @@ Mục tiêu:
 ### Project tổng kết
 
 Cấu trúc thư mục:
+```text
 01-embedded-foundation/
 ├── README.md
 ├── Makefile
@@ -1183,6 +1184,7 @@ Cấu trúc thư mục:
 │   ├── sections-analysis.md
 │   └── map-analysis.md
 └── build/
+```
 
 ---
 
