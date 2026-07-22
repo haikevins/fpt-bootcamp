@@ -1159,6 +1159,8 @@ Mục tiêu:
 - Biết phân tích mức sử dụng Flash/RAM.
 - Chuẩn bị cho việc tối ưu firmware.
 
+### Project tổng kết
+
 ---
 
 ## 15. Lỗi thường gặp
