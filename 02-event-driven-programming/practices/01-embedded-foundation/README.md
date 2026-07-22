@@ -1,4 +1,4 @@
-# 01 — Embedded Foundation
+# 01 - Embedded Foundation
 
 Repository thực hành cho **Chủ đề 1: Kiến thức nền tảng trong Embedded System Programming**.
 
