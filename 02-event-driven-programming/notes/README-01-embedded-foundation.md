@@ -1305,12 +1305,12 @@ Sau chủ đề này, repository cá nhân nên có tối thiểu:
 │   └── uart.h
 ├── labs/
 │   ├── 01-endianness/ # practice 1
-│   ├── 02-memory-access/
-│   ├── 03-memory-sections/
-│   ├── 04-startup-code/
-│   ├── 05-linker-script/
-│   ├── 06-gpio-register/
-│   ├── 07-uart-polling/
+│   ├── 02-memory-access/ # practice 2
+│   ├── 03-memory-sections/ # practice 3
+│   ├── 04-startup-code/ # practice 4
+│   ├── 05-linker-script/ # practice 5
+│   ├── 06-gpio-register/ # practice 6
+│   ├── 07-uart-polling/ # practice 7
 │   └── 08-map-analysis/ # practice 8
 ├── docs/
 │   ├── memory-map.md
