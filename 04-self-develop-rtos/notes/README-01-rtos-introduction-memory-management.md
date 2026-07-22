@@ -2242,10 +2242,10 @@ Tạo bảng:
 
 ### Tiêu chí hoàn thành
 
-- [ ] Tổng RAM không vượt SRAM target.
-- [ ] Có reserve cho main stack và driver buffer.
-- [ ] Có giải thích object nào có thể giảm.
-- [ ] Có so sánh static allocation và dynamic allocation.
+- Tổng RAM không vượt SRAM target.
+- Có reserve cho main stack và driver buffer.
+- Có giải thích object nào có thể giảm.
+- Có so sánh static allocation và dynamic allocation.
 
 ---
 
@@ -2265,10 +2265,10 @@ Cài first-fit đơn giản trước khi thêm splitting.
 
 ### Tiêu chí hoàn thành
 
-- [ ] First-fit tìm đúng block đầu tiên.
-- [ ] Free trả block về trạng thái rảnh.
-- [ ] Double free được phát hiện.
-- [ ] Host tests pass với sanitizer.
+- First-fit tìm đúng block đầu tiên.
+- Free trả block về trạng thái rảnh.
+- Double free được phát hiện.
+- Host tests pass với sanitizer.
 
 ---
 
@@ -2296,10 +2296,10 @@ Expected:
 
 ### Tiêu chí hoàn thành
 
-- [ ] Payload trả về aligned.
-- [ ] Block list không overlap.
-- [ ] Exact-fit không split.
-- [ ] Validator pass sau mỗi allocation.
+- Payload trả về aligned.
+- Block list không overlap.
+- Exact-fit không split.
+- Validator pass sau mỗi allocation.
 
 ---
 
@@ -2340,11 +2340,11 @@ Toàn bộ heap trở lại một free block
 
 ### Tiêu chí hoàn thành
 
-- [ ] Forward merge hoạt động.
-- [ ] Backward merge hoạt động.
-- [ ] Merge cả hai phía hoạt động.
-- [ ] Header cũ bị vô hiệu hóa.
-- [ ] Có test allocation sau coalescing.
+- Forward merge hoạt động.
+- Backward merge hoạt động.
+- Merge cả hai phía hoạt động.
+- Header cũ bị vô hiệu hóa.
+- Có test allocation sau coalescing.
 
 ---
 
@@ -2365,10 +2365,10 @@ Không để allocator âm thầm hỏng.
 
 ### Tiêu chí hoàn thành
 
-- [ ] Mỗi lỗi có status rõ ràng.
-- [ ] Validator phát hiện corruption.
-- [ ] Test không gây undefined behavior ngoài phạm vi kiểm soát.
-- [ ] Có tài liệu mô tả failure policy.
+- Mỗi lỗi có status rõ ràng.
+- Validator phát hiện corruption.
+- Test không gây undefined behavior ngoài phạm vi kiểm soát.
+- Có tài liệu mô tả failure policy.
 
 ---
 
@@ -2402,9 +2402,9 @@ Ghi lại:
 
 ### Tiêu chí hoàn thành
 
-- [ ] Giải thích được vì sao tổng free đủ nhưng allocation có thể fail.
-- [ ] So sánh kết quả trước và sau coalescing.
-- [ ] In được block map.
+- Giải thích được vì sao tổng free đủ nhưng allocation có thể fail.
+- So sánh kết quả trước và sau coalescing.
+- In được block map.
 
 ---
 
@@ -2433,11 +2433,11 @@ static uint8_t g_heap_storage[2048]
 
 ### Tiêu chí hoàn thành
 
-- [ ] Firmware build không warning.
-- [ ] UART hiển thị đúng sequence.
-- [ ] Heap validator pass.
-- [ ] Không có HardFault.
-- [ ] Kết quả host và target nhất quán.
+- Firmware build không warning.
+- UART hiển thị đúng sequence.
+- Heap validator pass.
+- Không có HardFault.
+- Kết quả host và target nhất quán.
 
 ---
 
@@ -2820,62 +2820,62 @@ Người học được xem là hoàn thành chủ đề khi có thể:
 
 ## RTOS foundation
 
-- [ ] Giải thích RTOS là gì.
-- [ ] Giải thích real-time khác fast như thế nào.
-- [ ] Phân biệt hard, firm và soft real-time.
-- [ ] Giải thích latency, response time, deadline, jitter và WCET.
-- [ ] So sánh super-loop và RTOS.
-- [ ] Nêu được trường hợp không cần RTOS.
-- [ ] Vẽ được kiến trúc tổng quát của một RTOS.
+- Giải thích RTOS là gì.
+- Giải thích real-time khác fast như thế nào.
+- Phân biệt hard, firm và soft real-time.
+- Giải thích latency, response time, deadline, jitter và WCET.
+- So sánh super-loop và RTOS.
+- Nêu được trường hợp không cần RTOS.
+- Vẽ được kiến trúc tổng quát của một RTOS.
 
 ## MCU memory layout
 
-- [ ] Phân biệt Flash và SRAM.
-- [ ] Phân biệt `.text`, `.rodata`, `.data`, `.bss`, stack và heap.
-- [ ] Đọc được map file.
-- [ ] Xác định được vector table.
-- [ ] Xác định được stack top.
-- [ ] Giải thích được quá trình copy `.data`.
-- [ ] Giải thích được quá trình clear `.bss`.
-- [ ] Tính được static RAM budget.
+- Phân biệt Flash và SRAM.
+- Phân biệt `.text`, `.rodata`, `.data`, `.bss`, stack và heap.
+- Đọc được map file.
+- Xác định được vector table.
+- Xác định được stack top.
+- Giải thích được quá trình copy `.data`.
+- Giải thích được quá trình clear `.bss`.
+- Tính được static RAM budget.
 
 ## Allocation
 
-- [ ] Phân biệt static, stack, heap và fixed-size pool.
-- [ ] Giải thích internal fragmentation.
-- [ ] Giải thích external fragmentation.
-- [ ] Giải thích memory leak.
-- [ ] Giải thích double free.
-- [ ] Giải thích use-after-free.
-- [ ] Nêu được vì sao dynamic allocation khó dùng trong real-time path.
+- Phân biệt static, stack, heap và fixed-size pool.
+- Giải thích internal fragmentation.
+- Giải thích external fragmentation.
+- Giải thích memory leak.
+- Giải thích double free.
+- Giải thích use-after-free.
+- Nêu được vì sao dynamic allocation khó dùng trong real-time path.
 
 ## First-fit allocator
 
-- [ ] Thiết kế block header.
-- [ ] Align requested size.
-- [ ] Tìm first-fit block.
-- [ ] Xử lý exact fit.
-- [ ] Split block.
-- [ ] Coalesce forward.
-- [ ] Coalesce backward.
-- [ ] Detect invalid pointer.
-- [ ] Detect double free.
-- [ ] Xử lý out-of-memory.
-- [ ] Validate block list.
-- [ ] Thu thập allocator statistics.
-- [ ] Đo fragmentation.
+- Thiết kế block header.
+- Align requested size.
+- Tìm first-fit block.
+- Xử lý exact fit.
+- Split block.
+- Coalesce forward.
+- Coalesce backward.
+- Detect invalid pointer.
+- Detect double free.
+- Xử lý out-of-memory.
+- Validate block list.
+- Thu thập allocator statistics.
+- Đo fragmentation.
 
 ## Test và project
 
-- [ ] Host tests pass.
-- [ ] ASan pass.
-- [ ] UBSan pass.
-- [ ] Randomized test pass.
-- [ ] Target demo chạy trên STM32F103.
-- [ ] UART command hoạt động.
-- [ ] Có report thí nghiệm.
-- [ ] Có README trên GitHub.
-- [ ] Allocator lab không trở thành dependency của production kernel.
+- Host tests pass.
+- ASan pass.
+- UBSan pass.
+- Randomized test pass.
+- Target demo chạy trên STM32F103.
+- UART command hoạt động.
+- Có report thí nghiệm.
+- Có README trên GitHub.
+- Allocator lab không trở thành dependency của production kernel.
 
 ---
 
@@ -2885,159 +2885,174 @@ Người học được xem là hoàn thành chủ đề khi có thể:
 01-rtos-introduction-memory-management/
 ├── README.md
 ├── Makefile
-├── CMakeLists.txt
+├── .gitignore
 │
-├── include/
-│   ├── hr_heap_lab.h
-│   ├── memory_layout.h
-│   ├── stack_monitor.h
-│   ├── command_parser.h
-│   └── memory_explorer.h
-│
-├── src/
-│   ├── hr_heap_lab.c
-│   ├── hr_heap_validate.c
-│   ├── hr_heap_stats.c
-│   ├── memory_layout.c
-│   ├── stack_monitor.c
-│   ├── command_parser.c
-│   ├── memory_explorer.c
-│   └── main.c
-│
-├── platform/
-│   ├── startup.c
-│   ├── clock.c
-│   ├── gpio.c
-│   ├── uart.c
-│   ├── systick.c
-│   └── critical_section.c
+├── common/
+│   ├── include/
+│   │   ├── platform/
+│   │   │   ├── clock.h
+│   │   │   ├── gpio.h
+│   │   │   ├── uart.h
+│   │   │   └── systick.h
+│   │   └── common/
+│   │       ├── assert.h
+│   │       └── compiler.h
+│   │
+│   └── src/
+│       ├── clock.c
+│       ├── gpio.c
+│       ├── uart.c
+│       ├── systick.c
+│       └── startup.c
 │
 ├── linker/
 │   └── stm32f103c8t6.ld
 │
 ├── labs/
 │   ├── 01-memory-layout/
+│   │   ├── README.md
+│   │   ├── src/
+│   │   │   └── main.c
+│   │   └── expected/
+│   │       └── memory-map-example.md
+│   │
 │   ├── 02-startup-sections/
+│   │   ├── README.md
+│   │   ├── src/
+│   │   │   └── main.c
+│   │   └── expected/
+│   │       └── startup-flow.md
+│   │
 │   ├── 03-stack-high-water/
+│   │   ├── README.md
+│   │   ├── include/
+│   │   │   └── stack_monitor.h
+│   │   ├── src/
+│   │   │   ├── stack_monitor.c
+│   │   │   └── main.c
+│   │   └── tests/
+│   │       └── test_stack_monitor.c
+│   │
 │   ├── 04-static-memory-budget/
+│   │   ├── README.md
+│   │   ├── memory-budget.md
+│   │   └── src/
+│   │       └── main.c
+│   │
 │   ├── 05-first-fit-basic/
+│   │   ├── README.md
+│   │   ├── include/
+│   │   │   └── heap.h
+│   │   ├── src/
+│   │   │   ├── heap.c
+│   │   │   └── main.c
+│   │   └── tests/
+│   │       ├── test_heap_init.c
+│   │       ├── test_heap_alloc.c
+│   │       └── test_main.c
+│   │
 │   ├── 06-block-splitting/
+│   │   ├── README.md
+│   │   ├── include/
+│   │   │   └── heap.h
+│   │   ├── src/
+│   │   │   ├── heap.c
+│   │   │   └── main.c
+│   │   └── tests/
+│   │       ├── test_heap_split.c
+│   │       └── test_main.c
+│   │
 │   ├── 07-block-coalescing/
+│   │   ├── README.md
+│   │   ├── include/
+│   │   │   └── heap.h
+│   │   ├── src/
+│   │   │   ├── heap.c
+│   │   │   └── main.c
+│   │   └── tests/
+│   │       ├── test_heap_coalesce.c
+│   │       └── test_main.c
+│   │
 │   ├── 08-invalid-free/
+│   │   ├── README.md
+│   │   ├── include/
+│   │   │   └── heap.h
+│   │   ├── src/
+│   │   │   ├── heap.c
+│   │   │   ├── heap_validate.c
+│   │   │   └── main.c
+│   │   └── tests/
+│   │       ├── test_invalid_free.c
+│   │       ├── test_double_free.c
+│   │       └── test_main.c
+│   │
 │   ├── 09-fragmentation/
+│   │   ├── README.md
+│   │   ├── include/
+│   │   │   ├── heap.h
+│   │   │   └── heap_stats.h
+│   │   ├── src/
+│   │   │   ├── heap.c
+│   │   │   ├── heap_stats.c
+│   │   │   └── main.c
+│   │   ├── tests/
+│   │   │   ├── test_heap_statistics.c
+│   │   │   ├── test_heap_randomized.c
+│   │   │   └── test_main.c
+│   │   └── report/
+│   │       └── fragmentation-report.md
+│   │
 │   └── 10-target-demo/
+│       ├── README.md
+│       ├── include/
+│       │   └── heap.h
+│       ├── src/
+│       │   ├── heap.c
+│       │   └── main.c
+│       └── report/
+│           └── target-validation.md
 │
-├── tests/
-│   ├── test_heap_init.c
-│   ├── test_heap_alignment.c
-│   ├── test_heap_split.c
-│   ├── test_heap_coalesce.c
-│   ├── test_heap_invalid_free.c
-│   ├── test_heap_statistics.c
-│   ├── test_heap_randomized.c
-│   └── test_main.c
-│
-├── examples/
+├── project/
 │   └── memory-explorer/
-│       └── main.c
+│       ├── README.md
+│       ├── include/
+│       │   ├── command_parser.h
+│       │   ├── heap.h
+│       │   ├── heap_stats.h
+│       │   ├── memory_layout.h
+│       │   ├── memory_explorer.h
+│       │   └── stack_monitor.h
+│       ├── src/
+│       │   ├── command_parser.c
+│       │   ├── heap.c
+│       │   ├── heap_stats.c
+│       │   ├── heap_validate.c
+│       │   ├── memory_layout.c
+│       │   ├── memory_explorer.c
+│       │   ├── stack_monitor.c
+│       │   └── main.c
+│       └── tests/
+│           └── test_memory_explorer.c
 │
 ├── docs/
 │   ├── rtos-introduction.md
 │   ├── memory-map.md
 │   ├── startup-flow.md
 │   ├── allocation-models.md
-│   ├── allocator-design.md
-│   ├── fragmentation-report.md
-│   ├── stack-experiment.md
-│   └── target-validation.md
+│   └── allocator-design.md
 │
 ├── tools/
 │   ├── run_host_tests.sh
 │   ├── inspect_map.sh
-│   └── check_format.sh
+│   ├── check_format.sh
+│   └── check_structure.py
 │
 └── build/
 ```
 
-## Tích hợp trực tiếp vào HairRTOS
-
-Nếu không tạo repository độc lập, nên đặt lab tại:
-
-```text
-hairtos/
-├── labs/
-│   └── memory-allocator/
-│       ├── README.md
-│       ├── CMakeLists.txt
-│       ├── include/
-│       │   └── hr_heap_lab.h
-│       ├── src/
-│       │   ├── hr_heap_lab.c
-│       │   ├── hr_heap_validate.c
-│       │   └── hr_heap_stats.c
-│       ├── tests/
-│       │   ├── test_heap_lab.c
-│       │   └── test_heap_randomized.c
-│       └── target/
-│           └── main.c
-│
-├── examples/
-│   └── memory-explorer/
-│
-└── docs/
-    ├── rtos-introduction.md
-    ├── memory-model.md
-    ├── memory-allocator-lab.md
-    └── fragmentation-report.md
-```
-
 ---
 
-# 29. Tài liệu cần ghi lại
-
-README project thực hành nên có:
-
-- Mục tiêu.
-- Board và MCU.
-- Toolchain.
-- Memory map.
-- Startup flow.
-- Heap region.
-- Alignment policy.
-- Block header layout.
-- First-fit search policy.
-- Split policy.
-- Coalescing policy.
-- Error policy.
-- Thread-safety policy.
-- ISR policy.
-- Test command.
-- Sanitizer result.
-- Target validation.
-- Block map mẫu.
-- Fragmentation experiment.
-- RAM usage.
-- Hạn chế.
-- Hướng phát triển.
-
-## Report cho mỗi lab
-
-```text
-Lab name:
-Objective:
-Setup:
-Expected result:
-Actual result:
-Pass/Fail:
-Failure injected:
-Root cause:
-Fix:
-Evidence:
-```
-
----
-
-# 30. Tổng kết
+# 29. Tổng kết
 
 Chủ đề 1 xây dựng nền tảng cho toàn bộ quá trình tự phát triển RTOS.
 
