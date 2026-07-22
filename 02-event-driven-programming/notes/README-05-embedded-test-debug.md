@@ -3041,41 +3041,41 @@ PC script:
 
 # 51. Tiêu chí hoàn thành
 
-- [ ] Phân biệt các cấp độ test.
-- [ ] Thiết kế module có khả năng test.
-- [ ] Dùng dependency injection trong C.
-- [ ] Viết Stub.
-- [ ] Viết Fake.
-- [ ] Viết Spy.
-- [ ] Viết Unit Test trên host.
-- [ ] Viết Unit Test trên target.
-- [ ] Tạo UART Shell.
-- [ ] Shell giao tiếp qua event.
-- [ ] Tạo command table.
-- [ ] Tạo event injection command.
-- [ ] Phân biệt text log và binary log.
-- [ ] Tạo event trace ring buffer.
-- [ ] Ghi trace lifecycle của event.
-- [ ] Đo queue latency.
-- [ ] Đo handler execution time.
-- [ ] Theo dõi mailbox high-water mark.
-- [ ] Theo dõi Event Pool high-water mark.
-- [ ] Lưu crash record.
-- [ ] Đọc reset reason.
-- [ ] Lưu HardFault register.
-- [ ] Tạo fake time.
-- [ ] Test timer wraparound.
-- [ ] Test State Machine transition coverage.
-- [ ] Test queue overflow.
-- [ ] Test pool exhaustion.
-- [ ] Test Data-Link lỗi CRC.
-- [ ] Thực hiện Fault Injection.
-- [ ] Chạy Stress Test.
-- [ ] Chạy Soak Test.
-- [ ] Tạo Regression Test cho bug.
-- [ ] Tích hợp CI.
-- [ ] Xuất test report.
-- [ ] Có tài liệu Test Plan trên GitHub.
+- Phân biệt các cấp độ test.
+- Thiết kế module có khả năng test.
+- Dùng dependency injection trong C.
+- Viết Stub.
+- Viết Fake.
+- Viết Spy.
+- Viết Unit Test trên host.
+- Viết Unit Test trên target.
+- Tạo UART Shell.
+- Shell giao tiếp qua event.
+- Tạo command table.
+- Tạo event injection command.
+- Phân biệt text log và binary log.
+- Tạo event trace ring buffer.
+- Ghi trace lifecycle của event.
+- Đo queue latency.
+- Đo handler execution time.
+- Theo dõi mailbox high-water mark.
+- Theo dõi Event Pool high-water mark.
+- Lưu crash record.
+- Đọc reset reason.
+- Lưu HardFault register.
+- Tạo fake time.
+- Test timer wraparound.
+- Test State Machine transition coverage.
+- Test queue overflow.
+- Test pool exhaustion.
+- Test Data-Link lỗi CRC.
+- Thực hiện Fault Injection.
+- Chạy Stress Test.
+- Chạy Soak Test.
+- Tạo Regression Test cho bug.
+- Tích hợp CI.
+- Xuất test report.
+- Có tài liệu Test Plan trên GitHub.
 
 ---
 
