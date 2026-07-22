@@ -1237,7 +1237,7 @@ Kiểm tra:
 
 Người học được xem là hoàn thành chủ đề khi có thể:
 
-- [ ] Giải thích `PC`, `SP`, `LR`.
+- Giải thích `PC`, `SP`, `LR`.
 - [ ] Vẽ được sơ đồ Flash, SRAM, peripheral.
 - [ ] Phân biệt `.text`, `.rodata`, `.data`, `.bss`, stack và heap.
 - [ ] Giải thích được `volatile`.
