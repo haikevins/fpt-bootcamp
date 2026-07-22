@@ -1,4 +1,4 @@
-# Chủ đề 1 — Kiến thức nền tảng trong Embedded System Programming
+# Chủ đề 1 - Kiến thức nền tảng trong Embedded System Programming
 
 > Mục tiêu của chủ đề này là xây dựng nền tảng vững chắc về kiến trúc máy tính, địa chỉ, bộ nhớ và quy trình tạo một dự án bare-metal cho vi điều khiển ARM Cortex-M.
 

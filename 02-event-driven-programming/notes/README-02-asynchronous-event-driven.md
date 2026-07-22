@@ -1,4 +1,4 @@
-# Chủ đề 2 — Lập trình bất đồng bộ và hướng sự kiện
+# Chủ đề 2 - Lập trình bất đồng bộ và hướng sự kiện
 ## Asynchronous & Event-Driven Programming
 
 > Mục tiêu của chủ đề này là hiểu vì sao firmware cần chuyển từ cách viết tuần tự, polling và blocking sang mô hình bất đồng bộ hướng sự kiện; đồng thời tự xây dựng được một Event-Driven Framework tối thiểu gồm Event, Event Queue, Dispatcher, Event Handler, Timer Event và State Machine.

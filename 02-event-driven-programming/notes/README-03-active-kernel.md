@@ -1,4 +1,4 @@
-# Chủ đề 3 — Active Kernel (AK)
+# Chủ đề 3 - Active Kernel (AK)
 ## Khái niệm, tính năng và cách sử dụng
 
 > Chủ đề này tập trung vào cách sử dụng Active Kernel để tổ chức một firmware hướng sự kiện bằng **Task**, **Signal**, **Message**, **Timer** và **State Machine**.  

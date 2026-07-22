@@ -1,4 +1,4 @@
-# Chủ đề 5 — Xây dựng hệ thống kiểm thử và gỡ lỗi cho Embedded Programming
+# Chủ đề 5 - Xây dựng hệ thống kiểm thử và gỡ lỗi cho Embedded Programming
 ## Test, Debug, Trace và Automated Test trong hệ thống Event-Driven
 
 > Mục tiêu của chủ đề này là xây dựng một hệ thống kiểm thử và gỡ lỗi có thể sử dụng trong suốt vòng đời của firmware: từ lúc phát triển trên bàn làm việc, tích hợp phần cứng, kiểm thử use case, cho đến khi thiết bị đã được triển khai ngoài thực tế.

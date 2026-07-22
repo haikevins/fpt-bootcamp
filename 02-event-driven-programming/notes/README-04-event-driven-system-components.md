@@ -1,4 +1,4 @@
-# Chủ đề 4 — Các thành phần chính của hệ thống Event-Driven trong Embedded
+# Chủ đề 4 - Các thành phần chính của hệ thống Event-Driven trong Embedded
 
 > Chủ đề này tập trung vào cấu trúc bên trong của một hệ thống Event-Driven hoàn chỉnh trong firmware nhúng, bao gồm **Active Object**, **Mailbox**, **Event Handler**, **State Machine**, **Event Pool** và **Data-Link Layer**.  
 > Mục tiêu cuối cùng là giúp người học hiểu cách một ứng dụng hướng sự kiện được tổ chức từ một MCU đơn lẻ cho tới hệ thống nhiều MCU, nhiều process hoặc nhiều node trong cùng một network.
