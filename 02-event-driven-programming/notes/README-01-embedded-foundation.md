@@ -1319,15 +1319,3 @@ Sau chủ đề này, repository cá nhân nên có tối thiểu:
 │   └── map-analysis.md
 └── build/
 ```
-
-README nên ghi rõ:
-
-- Board đang sử dụng.
-- MCU đang sử dụng.
-- Toolchain.
-- Pinout.
-- Memory map.
-- Cách build.
-- Cách flash.
-- Kết quả thực nghiệm.
-- Những lỗi đã gặp và cách xử lý.
