@@ -112,6 +112,8 @@ lab03:
 	$(HOST_CC) $(HOST_CFLAGS) labs/03-memory-sections/main.c \
 		-o $(BUILD_DIR)/labs/lab03-memory-sections
 
+host-labs: lab01 lab02 lab03
+
 lab04:
 	$(MAKE) -C labs/04-startup-code \
 		BUILD_DIR=../../build/labs/lab04
@@ -132,7 +134,7 @@ lab08:
 	$(MAKE) -C labs/08-map-analysis \
 		BUILD_DIR=../../build/labs/lab08 report
 
-all-labs: lab01 lab02 lab03 lab04 lab05 lab06 lab07 lab08
+all-labs: host-labs lab04 lab05 lab06 lab07 lab08
 
 rebuild: clean all
 
