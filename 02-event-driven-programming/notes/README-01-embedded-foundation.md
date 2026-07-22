@@ -530,17 +530,17 @@ Sau khi reset, Cortex-M thường thực hiện:
 Reset
   |
   v
-Đọc Initial Stack Pointer từ Vector Table
+Đọc Initial Stack Pointer từ Vector Table (phần tử đầu tiên)
   |
   v
-Đọc địa chỉ Reset_Handler
+Đọc địa chỉ Reset_Handler từ Vector Table (phần tử thứ hai)
   |
   v
 Thực thi Reset_Handler
   |
   +--> Copy .data từ Flash sang RAM
   |
-  +--> Zero .bss
+  +--> Khởi tạo vùng nhớ .bss (biến toàn cục = 0)
   |
   +--> Khởi tạo clock và runtime
   |
