@@ -1989,27 +1989,27 @@ So sánh:
 
 # 23. Tiêu chí hoàn thành
 
-- [ ] Phân biệt synchronous và asynchronous.
-- [ ] Giải thích được Event-Driven Programming.
-- [ ] Phân tích được vấn đề của blocking delay.
-- [ ] Thiết kế được danh sách signal.
-- [ ] Viết được event structure.
-- [ ] Viết được circular event queue.
-- [ ] Xử lý queue full và empty.
-- [ ] Có overflow counter hoặc error policy.
-- [ ] Viết được dispatcher.
-- [ ] Viết được handler run-to-completion.
-- [ ] Viết được software timer.
-- [ ] Chuyển xử lý từ ISR sang event context.
-- [ ] Viết được State Machine bằng `enum` và `switch`.
-- [ ] Vẽ được state diagram.
-- [ ] Viết được transition table.
-- [ ] Xác định được ownership dữ liệu.
-- [ ] Không gửi pointer tới biến local qua event.
-- [ ] Unit test queue và State Machine.
-- [ ] Trace được luồng event.
-- [ ] Demo chạy được trên board.
-- [ ] Có tài liệu trên GitHub.
+- Phân biệt synchronous và asynchronous.
+- Giải thích được Event-Driven Programming.
+- Phân tích được vấn đề của blocking delay.
+- Thiết kế được danh sách signal.
+- Viết được event structure.
+- Viết được circular event queue.
+- Xử lý queue full và empty.
+- Có overflow counter hoặc error policy.
+- Viết được dispatcher.
+- Viết được handler run-to-completion.
+- Viết được software timer.
+- Chuyển xử lý từ ISR sang event context.
+- Viết được State Machine bằng `enum` và `switch`.
+- Vẽ được state diagram.
+- Viết được transition table.
+- Xác định được ownership dữ liệu.
+- Không gửi pointer tới biến local qua event.
+- Unit test queue và State Machine.
+- Trace được luồng event.
+- Demo chạy được trên board.
+- Có tài liệu trên GitHub.
 
 ---
 
