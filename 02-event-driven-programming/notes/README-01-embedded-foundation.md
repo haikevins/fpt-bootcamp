@@ -1238,19 +1238,19 @@ Kiểm tra:
 Người học được xem là hoàn thành chủ đề khi có thể:
 
 - Giải thích `PC`, `SP`, `LR`.
-- [ ] Vẽ được sơ đồ Flash, SRAM, peripheral.
-- [ ] Phân biệt `.text`, `.rodata`, `.data`, `.bss`, stack và heap.
-- [ ] Giải thích được `volatile`.
-- [ ] Đọc và ghi một thanh ghi bằng con trỏ.
-- [ ] Giải thích được Memory-Mapped I/O.
-- [ ] Tự viết vector table tối thiểu.
-- [ ] Tự viết `Reset_Handler`.
-- [ ] Tự viết linker script.
-- [ ] Tự viết Makefile.
-- [ ] Build được `.elf`, `.bin`, `.hex`, `.map`.
-- [ ] Dùng `objdump`, `nm`, `size` để phân tích firmware.
-- [ ] Điều khiển GPIO không dùng HAL.
-- [ ] Commit source code và tài liệu lên GitHub.
+- Vẽ được sơ đồ Flash, SRAM, peripheral.
+- Phân biệt `.text`, `.rodata`, `.data`, `.bss`, stack và heap.
+- Giải thích được `volatile`.
+- Đọc và ghi một thanh ghi bằng con trỏ.
+- Giải thích được Memory-Mapped I/O.
+- Tự viết vector table tối thiểu.
+- Tự viết `Reset_Handler`.
+- Tự viết linker script.
+- Tự viết Makefile.
+- Build được `.elf`, `.bin`, `.hex`, `.map`.
+- Dùng `objdump`, `nm`, `size` để phân tích firmware.
+- Điều khiển GPIO không dùng HAL.
+- Commit source code và tài liệu lên GitHub.
 
 ---
 
