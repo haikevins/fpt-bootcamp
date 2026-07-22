@@ -1291,6 +1291,7 @@ Sau chủ đề này, repository cá nhân nên có tối thiểu:
 01-embedded-foundation/
 ├── README.md
 ├── Makefile
+├── .gitignore
 ├── linker/
 │   └── memory.ld
 ├── startup/
@@ -1302,9 +1303,20 @@ Sau chủ đề này, repository cá nhân nên có tối thiểu:
 ├── include/
 │   ├── gpio.h
 │   └── uart.h
+├── labs/
+│   ├── 01-endianness/ # practice 1
+│   ├── 02-memory-access/
+│   ├── 03-memory-sections/
+│   ├── 04-startup-code/
+│   ├── 05-linker-script/
+│   ├── 06-gpio-register/
+│   ├── 07-uart-polling/
+│   └── 08-map-analysis/ # practice 8
 ├── docs/
 │   ├── memory-map.md
-│   └── startup-flow.md
+│   ├── startup-flow.md
+│   ├── sections-analysis.md
+│   └── map-analysis.md
 └── build/
 ```
 
