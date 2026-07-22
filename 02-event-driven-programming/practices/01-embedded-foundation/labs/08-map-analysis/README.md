@@ -1,4 +1,4 @@
-# Lab 08 — Map File Analysis
+# Lab 08 - Map File Analysis
 
 Project standalone có code cố ý tạo các object với kích thước dễ quan sát.
 

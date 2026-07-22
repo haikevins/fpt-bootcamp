@@ -1,4 +1,4 @@
-# Lab 01 — Endianness
+# Lab 01 - Endianness
 
 ## Mục tiêu
 

@@ -1,4 +1,4 @@
-# Lab 04 — Startup Code
+# Lab 04 - Startup Code
 
 Project standalone:
 

@@ -1,4 +1,4 @@
-# Lab 06 — GPIO Register-Level
+# Lab 06 - GPIO Register-Level
 
 Project standalone có đầy đủ Startup Code, Linker Script, driver GPIO và `main.c`.
 

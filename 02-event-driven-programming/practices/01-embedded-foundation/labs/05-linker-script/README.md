@@ -1,4 +1,4 @@
-# Lab 05 — Linker Script
+# Lab 05 - Linker Script
 
 Project standalone gồm `main.c`, `startup.c`, `memory.ld` và `Makefile`.
 

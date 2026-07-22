@@ -1,4 +1,4 @@
-# Lab 02 — Memory Access
+# Lab 02 - Memory Access
 
 ## Mục tiêu
 

@@ -1,4 +1,4 @@
-# Lab 07 — UART Polling
+# Lab 07 - UART Polling
 
 Project standalone có Startup Code, Linker Script, GPIO, UART và `main.c`.
 

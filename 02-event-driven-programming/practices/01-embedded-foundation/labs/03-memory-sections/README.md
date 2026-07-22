@@ -1,4 +1,4 @@
-# Lab 03 — Memory Sections
+# Lab 03 - Memory Sections
 
 ## Mục tiêu
 
