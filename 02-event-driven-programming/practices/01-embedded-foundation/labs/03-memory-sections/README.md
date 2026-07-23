@@ -15,17 +15,21 @@ Khảo sát `.rodata`, `.data`, `.bss` và `.text`.
 ## Build và chạy
 
 ```bash
-make lab03
-./build/labs/lab03-memory-sections
+cd labs/03-memory-sections
+make
+make run
 ```
 
 ## Phân tích ELF host
 
 ```bash
-nm -S --size-sort build/labs/lab03-memory-sections
-objdump -h build/labs/lab03-memory-sections
-readelf -S build/labs/lab03-memory-sections
+make symbols
+make sections
+make elf-sections
+make report
 ```
+
+Các báo cáo được tạo trong `build/` của Lab 03.
 
 ## Phân tích firmware ARM
 

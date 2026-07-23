@@ -8,11 +8,18 @@
 
 ## Build và chạy
 
-Từ thư mục root:
+Từ thư mục lab:
 
 ```bash
-make lab01
-./build/labs/lab01-endianness
+cd labs/01-endianness
+make
+make run
+```
+
+Artifact được tạo tại:
+
+```text
+build/lab01_endianness
 ```
 
 ## Kết quả dự kiến trên little-endian

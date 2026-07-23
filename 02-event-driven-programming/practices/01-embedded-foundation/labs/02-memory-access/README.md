@@ -19,8 +19,15 @@ Lab chạy trên host 64-bit nên dùng `uintptr_t`. Trên Cortex-M3, không gia
 ## Build và chạy
 
 ```bash
-make lab02
-./build/labs/lab02-memory-access
+cd labs/02-memory-access
+make
+make run
+```
+
+Artifact được tạo tại:
+
+```text
+build/lab02_memory_access
 ```
 
 ## An toàn

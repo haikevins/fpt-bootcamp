@@ -51,6 +51,7 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── gpio.h
 │   └── uart.h
 ├── labs/
+│   ├── README.md
 │   ├── 01-endianness/
 │   ├── 02-memory-access/
 │   ├── 03-memory-sections/
@@ -218,27 +219,29 @@ Firmware sẽ echo ký tự nhận được.
 
 ---
 
-## 8. Build các lab chạy trên host
+## 8. Build từng lab độc lập
+
+Makefile ở root chỉ quản lý firmware tổng kết. Mỗi lab có Makefile riêng và chỉ tạo artifact trong thư mục `build/` của chính lab đó.
+
+Ví dụ lab chạy trên host:
 
 ```bash
-make lab01
-make lab02
-make lab03
+cd labs/01-endianness
+make
+make run
+make clean
 ```
 
-Hoặc:
+Ví dụ lab chạy trên STM32:
 
 ```bash
-make host-labs
+cd labs/06-gpio-register
+make
+make flash-stlink
+make clean
 ```
 
-Chạy:
-
-```bash
-./build/labs/lab01-endianness
-./build/labs/lab02-memory-access
-./build/labs/lab03-memory-sections
-```
+Danh sách lệnh của từng lab được mô tả trong README của lab và tại [`labs/README.md`](labs/README.md).
 
 ---
 

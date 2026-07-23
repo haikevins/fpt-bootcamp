@@ -20,11 +20,6 @@ make
 make report
 ```
 
-Hoặc:
-
-```bash
-make lab05
-```
 
 ## Phân tích
 

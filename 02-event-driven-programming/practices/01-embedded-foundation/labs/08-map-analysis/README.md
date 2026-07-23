@@ -18,11 +18,6 @@ make report
 ./analyze.sh
 ```
 
-Hoặc:
-
-```bash
-make lab08
-```
 
 Phân tích:
 

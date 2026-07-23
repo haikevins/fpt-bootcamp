@@ -19,8 +19,3 @@ make
 make flash-stlink
 ```
 
-Hoặc:
-
-```bash
-make lab07
-```

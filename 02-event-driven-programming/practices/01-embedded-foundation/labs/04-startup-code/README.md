@@ -32,8 +32,3 @@ cd labs/04-startup-code
 make
 ```
 
-Hoặc từ root:
-
-```bash
-make lab04
-```
