@@ -36,8 +36,7 @@
 26. [Lỗi thường gặp](#26-lỗi-thường-gặp)
 27. [Tiêu chí hoàn thành](#27-tiêu-chí-hoàn-thành)
 28. [Cấu trúc repository đề xuất](#28-cấu-trúc-repository-đề-xuất)
-29. [Tài liệu cần ghi lại](#29-tài-liệu-cần-ghi-lại)
-30. [Tổng kết](#30-tổng-kết)
+29. [Tổng kết](#29-tổng-kết)
 
 ---
 
