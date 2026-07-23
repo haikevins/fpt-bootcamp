@@ -1,8 +1,7 @@
 # Chủ đề 1 - Giới thiệu RTOS và quản lý bộ nhớ trong Kernel
-## RTOS Introduction, Getting Started with HairRTOS
+## RTOS Introduction, Getting Started
 
-> Chủ đề này được xây dựng theo nội dung **“RTOS introduction, getting started with AKOS”** trong chương trình tự phát triển RTOS.  
-> Phần thực hành được điều chỉnh để sử dụng project **HairRTOS** trên ARM Cortex-M3/STM32F103.
+> Chủ đề này được xây dựng theo nội dung **“RTOS introduction, getting started with AKOS”** trong chương trình tự phát triển AKOS.
 
 ---
 
