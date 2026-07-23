@@ -111,12 +111,6 @@ Phần nghiên cứu allocator độc lập
     |
     +-- Phase 14: Memory allocator lab
 ```
-
-Điểm quan trọng:
-
-> First-fit allocator là một **lab đào tạo độc lập**.  
-> Nó không phải dependency bắt buộc của scheduler, task, queue, timer hoặc synchronization trong HairRTOS v1.0.
-
 ---
 
 # 3. Kiến thức cần chuẩn bị
@@ -994,35 +988,6 @@ Nhược điểm:
 - Có internal fragmentation.
 - Cần nhiều pool nếu có nhiều kích thước object.
 
-## 14.5 Chính sách HairRTOS
-
-HairRTOS v1.0 theo hướng:
-
-```text
-Static-first production kernel
-```
-
-Application cung cấp trước:
-
-- TCB;
-- task stack;
-- queue storage;
-- synchronization object;
-- timer object;
-- Active Object;
-- initial event storage.
-
-First-fit allocator được xây dựng như một lab riêng để học:
-
-```text
-first-fit
-splitting
-coalescing
-fragmentation
-failure detection
-statistics
-```
-
 ---
 
 # 15. Fragmentation và các vấn đề bộ nhớ
@@ -1192,7 +1157,7 @@ Nếu coalescing dựa trên physical neighbors được lưu trong header, `fre
 
 ---
 
-# 17. Thiết kế allocator lab cho HairRTOS
+# 17. Thiết kế allocator lab
 
 ## 17.1 Phạm vi
 
@@ -2093,17 +2058,6 @@ Xác nhận validator phát hiện lỗi.
 
 # 23. Bài thực hành
 
-Mỗi bài thực hành cần có:
-
-- mục tiêu;
-- yêu cầu;
-- test;
-- kết quả mong đợi;
-- lỗi cố ý;
-- tiêu chí hoàn thành.
-
----
-
 ## Bài 1 — Quan sát memory layout
 
 ### Mục tiêu
@@ -2446,7 +2400,7 @@ static uint8_t g_heap_storage[2048]
 ## Tên project
 
 ```text
-HairRTOS Memory Explorer
+Memory Explorer
 ```
 
 ## 24.1 Mục tiêu
