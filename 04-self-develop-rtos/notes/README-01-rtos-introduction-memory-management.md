@@ -98,17 +98,6 @@ RTOS introduction, getting started with AKOS
     +-- First-fit schema implementation
 ```
 
-Trong repository HairRTOS, chủ đề này được chia thành hai phần:
-
-```text
-Phần nền tảng chạy trên MCU
-    |
-    +-- Phase 1: Bare-metal foundation
-
-Phần nghiên cứu allocator độc lập
-    |
-    +-- Phase 14: Memory allocator lab
-```
 ---
 
 # 3. Kiến thức cần chuẩn bị
