@@ -2824,171 +2824,193 @@ Người học được xem là hoàn thành chủ đề khi có thể:
 
 ```text
 01-rtos-introduction-memory-management/
-├── README.md
-├── Makefile
-├── .gitignore
-│
-├── common/
-│   ├── include/
-│   │   ├── platform/
-│   │   │   ├── clock.h
+├── docs
+│   ├── allocation-models.md
+│   ├── allocator-design.md
+│   ├── memory-map.md
+│   ├── rtos-introduction.md
+│   └── startup-flow.md
+├── include
+│   ├── command_parser.h
+│   ├── compiler.h
+│   ├── gpio.h
+│   ├── heap.h
+│   ├── heap_stats.h
+│   ├── memory_explorer.h
+│   ├── memory_layout.h
+│   ├── stack_monitor.h
+│   ├── stm32f1.h
+│   ├── systick.h
+│   └── uart.h
+├── labs
+│   ├── 01-memory-layout
+│   │   ├── include
+│   │   │   ├── compiler.h
 │   │   │   ├── gpio.h
-│   │   │   ├── uart.h
-│   │   │   └── systick.h
-│   │   └── common/
-│   │       ├── assert.h
-│   │       └── compiler.h
-│   │
-│   └── src/
-│       ├── clock.c
-│       ├── gpio.c
-│       ├── uart.c
-│       ├── systick.c
-│       └── startup.c
-│
-├── linker/
-│   └── stm32f103c8t6.ld
-│
-├── labs/
-│   ├── 01-memory-layout/
+│   │   │   ├── stm32f1.h
+│   │   │   ├── systick.h
+│   │   │   └── uart.h
+│   │   ├── linker
+│   │   │   └── memory.ld
+│   │   ├── Makefile
 │   │   ├── README.md
-│   │   ├── src/
-│   │   │   └── main.c
-│   │   └── expected/
-│   │       └── memory-map-example.md
-│   │
-│   ├── 02-startup-sections/
+│   │   ├── src
+│   │   │   ├── gpio.c
+│   │   │   ├── main.c
+│   │   │   ├── runtime.c
+│   │   │   ├── systick.c
+│   │   │   └── uart.c
+│   │   └── startup
+│   │       └── startup.c
+│   ├── 02-startup-sections
+│   │   ├── include
+│   │   │   ├── compiler.h
+│   │   │   ├── gpio.h
+│   │   │   ├── stm32f1.h
+│   │   │   ├── systick.h
+│   │   │   └── uart.h
+│   │   ├── linker
+│   │   │   └── memory.ld
+│   │   ├── Makefile
 │   │   ├── README.md
-│   │   ├── src/
-│   │   │   └── main.c
-│   │   └── expected/
-│   │       └── startup-flow.md
-│   │
-│   ├── 03-stack-high-water/
+│   │   ├── src
+│   │   │   ├── gpio.c
+│   │   │   ├── main.c
+│   │   │   ├── runtime.c
+│   │   │   ├── systick.c
+│   │   │   └── uart.c
+│   │   └── startup
+│   │       └── startup.c
+│   ├── 03-stack-high-water
+│   │   ├── include
+│   │   │   ├── stack_monitor.h
+│   │   │   └── test.h
+│   │   ├── Makefile
 │   │   ├── README.md
-│   │   ├── include/
-│   │   │   └── stack_monitor.h
-│   │   ├── src/
-│   │   │   ├── stack_monitor.c
-│   │   │   └── main.c
-│   │   └── tests/
+│   │   ├── src
+│   │   │   ├── main.c
+│   │   │   └── stack_monitor.c
+│   │   └── tests
+│   │       ├── test_main.c
 │   │       └── test_stack_monitor.c
-│   │
-│   ├── 04-static-memory-budget/
-│   │   ├── README.md
+│   ├── 04-static-memory-budget
+│   │   ├── Makefile
 │   │   ├── memory-budget.md
-│   │   └── src/
+│   │   ├── README.md
+│   │   └── src
 │   │       └── main.c
-│   │
-│   ├── 05-first-fit-basic/
+│   ├── 05-first-fit-basic
+│   │   ├── include
+│   │   │   ├── heap.h
+│   │   │   └── test.h
+│   │   ├── Makefile
 │   │   ├── README.md
-│   │   ├── include/
-│   │   │   └── heap.h
-│   │   ├── src/
+│   │   ├── src
 │   │   │   ├── heap.c
 │   │   │   └── main.c
-│   │   └── tests/
-│   │       ├── test_heap_init.c
+│   │   └── tests
 │   │       ├── test_heap_alloc.c
+│   │       ├── test_heap_init.c
 │   │       └── test_main.c
-│   │
-│   ├── 06-block-splitting/
+│   ├── 06-block-splitting
+│   │   ├── include
+│   │   │   ├── heap.h
+│   │   │   └── test.h
+│   │   ├── Makefile
 │   │   ├── README.md
-│   │   ├── include/
-│   │   │   └── heap.h
-│   │   ├── src/
+│   │   ├── src
 │   │   │   ├── heap.c
 │   │   │   └── main.c
-│   │   └── tests/
+│   │   └── tests
 │   │       ├── test_heap_split.c
 │   │       └── test_main.c
-│   │
-│   ├── 07-block-coalescing/
+│   ├── 07-block-coalescing
+│   │   ├── include
+│   │   │   ├── heap.h
+│   │   │   └── test.h
+│   │   ├── Makefile
 │   │   ├── README.md
-│   │   ├── include/
-│   │   │   └── heap.h
-│   │   ├── src/
+│   │   ├── src
 │   │   │   ├── heap.c
 │   │   │   └── main.c
-│   │   └── tests/
+│   │   └── tests
 │   │       ├── test_heap_coalesce.c
 │   │       └── test_main.c
-│   │
-│   ├── 08-invalid-free/
+│   ├── 08-invalid-free
+│   │   ├── include
+│   │   │   ├── heap.h
+│   │   │   └── test.h
+│   │   ├── Makefile
 │   │   ├── README.md
-│   │   ├── include/
-│   │   │   └── heap.h
-│   │   ├── src/
+│   │   ├── src
 │   │   │   ├── heap.c
 │   │   │   ├── heap_validate.c
 │   │   │   └── main.c
-│   │   └── tests/
-│   │       ├── test_invalid_free.c
+│   │   └── tests
 │   │       ├── test_double_free.c
+│   │       ├── test_invalid_free.c
 │   │       └── test_main.c
-│   │
-│   ├── 09-fragmentation/
-│   │   ├── README.md
-│   │   ├── include/
+│   ├── 09-fragmentation
+│   │   ├── include
 │   │   │   ├── heap.h
-│   │   │   └── heap_stats.h
-│   │   ├── src/
+│   │   │   ├── heap_stats.h
+│   │   │   └── test.h
+│   │   ├── Makefile
+│   │   ├── README.md
+│   │   ├── report
+│   │   │   └── fragmentation-report.md
+│   │   ├── src
 │   │   │   ├── heap.c
 │   │   │   ├── heap_stats.c
 │   │   │   └── main.c
-│   │   ├── tests/
-│   │   │   ├── test_heap_statistics.c
-│   │   │   ├── test_heap_randomized.c
-│   │   │   └── test_main.c
-│   │   └── report/
-│   │       └── fragmentation-report.md
-│   │
-│   └── 10-target-demo/
-│       ├── README.md
-│       ├── include/
-│       │   └── heap.h
-│       ├── src/
-│       │   ├── heap.c
-│       │   └── main.c
-│       └── report/
-│           └── target-validation.md
-│
-├── project/
-│   └── memory-explorer/
-│       ├── README.md
-│       ├── include/
-│       │   ├── command_parser.h
-│       │   ├── heap.h
-│       │   ├── heap_stats.h
-│       │   ├── memory_layout.h
-│       │   ├── memory_explorer.h
-│       │   └── stack_monitor.h
-│       ├── src/
-│       │   ├── command_parser.c
-│       │   ├── heap.c
-│       │   ├── heap_stats.c
-│       │   ├── heap_validate.c
-│       │   ├── memory_layout.c
-│       │   ├── memory_explorer.c
-│       │   ├── stack_monitor.c
-│       │   └── main.c
-│       └── tests/
-│           └── test_memory_explorer.c
-│
-├── docs/
-│   ├── rtos-introduction.md
-│   ├── memory-map.md
-│   ├── startup-flow.md
-│   ├── allocation-models.md
-│   └── allocator-design.md
-│
-├── tools/
-│   ├── run_host_tests.sh
-│   ├── inspect_map.sh
-│   ├── check_format.sh
-│   └── check_structure.py
-│
-└── build/
+│   │   └── tests
+│   │       ├── test_heap_randomized.c
+│   │       ├── test_heap_statistics.c
+│   │       └── test_main.c
+│   ├── 10-target-demo
+│   │   ├── include
+│   │   │   ├── compiler.h
+│   │   │   ├── gpio.h
+│   │   │   ├── heap.h
+│   │   │   ├── stm32f1.h
+│   │   │   ├── systick.h
+│   │   │   └── uart.h
+│   │   ├── linker
+│   │   │   └── memory.ld
+│   │   ├── Makefile
+│   │   ├── README.md
+│   │   ├── report
+│   │   │   └── target-validation.md
+│   │   ├── src
+│   │   │   ├── gpio.c
+│   │   │   ├── heap.c
+│   │   │   ├── main.c
+│   │   │   ├── runtime.c
+│   │   │   ├── systick.c
+│   │   │   └── uart.c
+│   │   └── startup
+│   │       └── startup.c
+│   └── README.md
+├── LICENSE
+├── linker
+│   └── memory.ld
+├── Makefile
+├── README.md
+├── src
+│   ├── command_parser.c
+│   ├── gpio.c
+│   ├── heap.c
+│   ├── heap_stats.c
+│   ├── main.c
+│   ├── memory_explorer.c
+│   ├── memory_layout.c
+│   ├── runtime.c
+│   ├── stack_monitor.c
+│   ├── systick.c
+│   └── uart.c
+├── startup
+│   └── startup.c
+└── VALIDATION.md
 ```
 
 ---
