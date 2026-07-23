@@ -1,5 +1,4 @@
-| EMBEDDED SOFTWARE TRAINING PROGRAM |
-|---|
+# EMBEDDED SOFTWARE TRAINING PROGRAM
 
 | Track | Description | Mentor |
 |---|---|---|
