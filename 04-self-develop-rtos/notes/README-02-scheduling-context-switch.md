@@ -3234,45 +3234,6 @@ Project hoàn thành khi:
 └── build/
 ```
 
-## 35.1 Có nên dùng code platform chung cho lab?
-
-Có hai hướng:
-
-### Hướng A — Mỗi lab hoàn toàn độc lập
-
-Mỗi lab có:
-
-- startup;
-- linker;
-- platform;
-- Makefile.
-
-Ưu điểm:
-
-- copy riêng được;
-- dependency rõ;
-- lab tự chứa hoàn toàn.
-
-Nhược điểm:
-
-- trùng code.
-
-### Hướng B — Dùng shared platform
-
-Các lab dùng chung root platform.
-
-Ưu điểm:
-
-- ít trùng;
-- dễ bảo trì.
-
-Nhược điểm:
-
-- lab không còn hoàn toàn tự chứa;
-- thay root platform có thể ảnh hưởng lab cũ.
-
-Với mục tiêu học theo từng checkpoint và lưu lại trạng thái implementation, có thể chấp nhận lặp code có chủ đích.
-
 ---
 
 # 36. Liên hệ với roadmap HairRTOS
