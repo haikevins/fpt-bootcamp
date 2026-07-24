@@ -1,5 +1,5 @@
 # Chủ đề 2 - Scheduling và Context Switch trên ARM Cortex-M3
-## Priority Scheduler, SysTick, SVC và PendSV với HairRTOS
+## Priority Scheduler, SysTick, SVC và PendSV
 
 > Chủ đề này được xây dựng theo phạm vi **“Scheduling + Context Switch”** trong chương trình tự phát triển RTOS AKOS.  
 > Nội dung gốc của chủ đề tập trung vào:
@@ -310,9 +310,7 @@ Architecture port
 Cần phân biệt:
 
 ```text
-Scheduling decision
-!=
-Context-switch mechanism
+Scheduling decision != Context-switch mechanism
 ```
 
 ## Scheduling decision
