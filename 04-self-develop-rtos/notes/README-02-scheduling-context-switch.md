@@ -2467,20 +2467,6 @@ Ghi lại phương pháp debug
 
 # 33. Bài thực hành
 
-Mỗi lab phải có:
-
-- `README.md`;
-- `Makefile` riêng;
-- source riêng;
-- test riêng nếu chạy host;
-- output riêng trong `build/`;
-- mục tiêu;
-- kết quả mong đợi;
-- lỗi cố ý;
-- tiêu chí hoàn thành.
-
----
-
 ## Bài 01 — Cortex-M3 exception and stack inspection
 
 ### Mục tiêu
@@ -2529,7 +2515,7 @@ Stacked xPSR:
 
 ---
 
-## Lab 02 — Initial task stack builder
+## Bài 02 — Initial task stack builder
 
 ### Mục tiêu
 
@@ -2577,7 +2563,7 @@ Có thể test trên Ubuntu trước khi dùng target.
 
 ---
 
-## Lab 03 — Start first task using SVC
+## Bài 03 — Start first task using SVC
 
 ### Mục tiêu
 
@@ -2629,7 +2615,7 @@ argument->magic == EXPECTED_MAGIC
 
 ---
 
-## Lab 04 — Cooperative PendSV context switch
+## Bài 04 — Cooperative PendSV context switch
 
 ### Mục tiêu
 
@@ -2675,7 +2661,7 @@ static void task_a(void *argument)
 
 ---
 
-## Lab 05 — Priority scheduler policy on host
+## Bài 05 — Priority scheduler policy on host
 
 ### Mục tiêu
 
@@ -2721,7 +2707,7 @@ double insertion
 
 ---
 
-## Lab 06 — Fixed-priority scheduler on target
+## Bài 06 — Fixed-priority scheduler on target
 
 ### Mục tiêu
 
@@ -2755,7 +2741,7 @@ Vì chưa có blocking đầy đủ, lab có thể dùng release flag hoặc coo
 
 ---
 
-## Lab 07 — SysTick kernel tick and time slice
+## Bài 07 — SysTick kernel tick and time slice
 
 ### Mục tiêu
 
@@ -2791,7 +2777,7 @@ Dùng SysTick để:
 
 ---
 
-## Lab 08 — Preemption from interrupt
+## Bài 08 — Preemption from interrupt
 
 ### Mục tiêu
 
@@ -2835,7 +2821,7 @@ Task High chạy
 
 ---
 
-## Lab 09 — Equal-priority round-robin
+## Bài 09 — Equal-priority round-robin
 
 ### Mục tiêu
 
@@ -2874,7 +2860,7 @@ Không yêu cầu hoàn toàn bằng nhau tại mọi thời điểm.
 
 ---
 
-## Lab 10 — Context-switch stress and diagnostics
+## Bài 10 — Context-switch stress and diagnostics
 
 ### Mục tiêu
 
@@ -2926,7 +2912,7 @@ Scheduler invariant status:
 ## Tên project
 
 ```text
-HairRTOS Scheduler Playground
+Scheduler Playground
 ```
 
 ## 34.1 Mục tiêu
