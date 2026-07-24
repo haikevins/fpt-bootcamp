@@ -1,4 +1,4 @@
-# Chủ đề 2 — Scheduling và Context Switch trên ARM Cortex-M3
+# Chủ đề 2 - Scheduling và Context Switch trên ARM Cortex-M3
 ## Priority Scheduler, SysTick, SVC và PendSV với HairRTOS
 
 > Chủ đề này được xây dựng theo phạm vi **“Scheduling + Context Switch”** trong chương trình tự phát triển RTOS AKOS.  
@@ -49,9 +49,9 @@
 33. [Bài thực hành](#33-bài-thực-hành)
 34. [Project tổng kết chủ đề](#34-project-tổng-kết-chủ-đề)
 35. [Cấu trúc repository đề xuất](#35-cấu-trúc-repository-đề-xuất)
-37. [Liên hệ với roadmap HairRTOS](#37-liên-hệ-với-roadmap-hairtos)
-39. [Tiêu chí hoàn thành](#39-tiêu-chí-hoàn-thành)
-40. [Tổng kết](#40-tổng-kết)
+36. [Liên hệ với roadmap HairRTOS](#36-liên-hệ-với-roadmap-hairtos)
+37. [Tiêu chí hoàn thành](#37-tiêu-chí-hoàn-thành)
+38. [Tổng kết](#38-tổng-kết)
 
 ---
 
@@ -3436,7 +3436,7 @@ Bao phủ:
 
 ---
 
-# 40. Tổng kết
+# 38. Tổng kết
 
 Chủ đề 2 giải quyết hai câu hỏi trung tâm:
 
