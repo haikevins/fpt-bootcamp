@@ -2824,13 +2824,18 @@ Người học được xem là hoàn thành chủ đề khi có thể:
 
 ```text
 01-rtos-introduction-memory-management/
-├── docs
-│   ├── allocation-models.md
-│   ├── allocator-design.md
-│   ├── memory-map.md
-│   ├── rtos-introduction.md
-│   └── startup-flow.md
-├── include
+├── README.md
+├── Makefile
+├── .gitignore
+├── LICENSE
+│
+├── linker/
+│   └── memory.ld
+│
+├── startup/
+│   └── startup.c
+|
+├── include/
 │   ├── command_parser.h
 │   ├── compiler.h
 │   ├── gpio.h
@@ -2842,161 +2847,8 @@ Người học được xem là hoàn thành chủ đề khi có thể:
 │   ├── stm32f1.h
 │   ├── systick.h
 │   └── uart.h
-├── labs
-│   ├── 01-memory-layout
-│   │   ├── include
-│   │   │   ├── compiler.h
-│   │   │   ├── gpio.h
-│   │   │   ├── stm32f1.h
-│   │   │   ├── systick.h
-│   │   │   └── uart.h
-│   │   ├── linker
-│   │   │   └── memory.ld
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── gpio.c
-│   │   │   ├── main.c
-│   │   │   ├── runtime.c
-│   │   │   ├── systick.c
-│   │   │   └── uart.c
-│   │   └── startup
-│   │       └── startup.c
-│   ├── 02-startup-sections
-│   │   ├── include
-│   │   │   ├── compiler.h
-│   │   │   ├── gpio.h
-│   │   │   ├── stm32f1.h
-│   │   │   ├── systick.h
-│   │   │   └── uart.h
-│   │   ├── linker
-│   │   │   └── memory.ld
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── gpio.c
-│   │   │   ├── main.c
-│   │   │   ├── runtime.c
-│   │   │   ├── systick.c
-│   │   │   └── uart.c
-│   │   └── startup
-│   │       └── startup.c
-│   ├── 03-stack-high-water
-│   │   ├── include
-│   │   │   ├── stack_monitor.h
-│   │   │   └── test.h
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── main.c
-│   │   │   └── stack_monitor.c
-│   │   └── tests
-│   │       ├── test_main.c
-│   │       └── test_stack_monitor.c
-│   ├── 04-static-memory-budget
-│   │   ├── Makefile
-│   │   ├── memory-budget.md
-│   │   ├── README.md
-│   │   └── src
-│   │       └── main.c
-│   ├── 05-first-fit-basic
-│   │   ├── include
-│   │   │   ├── heap.h
-│   │   │   └── test.h
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── heap.c
-│   │   │   └── main.c
-│   │   └── tests
-│   │       ├── test_heap_alloc.c
-│   │       ├── test_heap_init.c
-│   │       └── test_main.c
-│   ├── 06-block-splitting
-│   │   ├── include
-│   │   │   ├── heap.h
-│   │   │   └── test.h
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── heap.c
-│   │   │   └── main.c
-│   │   └── tests
-│   │       ├── test_heap_split.c
-│   │       └── test_main.c
-│   ├── 07-block-coalescing
-│   │   ├── include
-│   │   │   ├── heap.h
-│   │   │   └── test.h
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── heap.c
-│   │   │   └── main.c
-│   │   └── tests
-│   │       ├── test_heap_coalesce.c
-│   │       └── test_main.c
-│   ├── 08-invalid-free
-│   │   ├── include
-│   │   │   ├── heap.h
-│   │   │   └── test.h
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── heap.c
-│   │   │   ├── heap_validate.c
-│   │   │   └── main.c
-│   │   └── tests
-│   │       ├── test_double_free.c
-│   │       ├── test_invalid_free.c
-│   │       └── test_main.c
-│   ├── 09-fragmentation
-│   │   ├── include
-│   │   │   ├── heap.h
-│   │   │   ├── heap_stats.h
-│   │   │   └── test.h
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── report
-│   │   │   └── fragmentation-report.md
-│   │   ├── src
-│   │   │   ├── heap.c
-│   │   │   ├── heap_stats.c
-│   │   │   └── main.c
-│   │   └── tests
-│   │       ├── test_heap_randomized.c
-│   │       ├── test_heap_statistics.c
-│   │       └── test_main.c
-│   ├── 10-target-demo
-│   │   ├── include
-│   │   │   ├── compiler.h
-│   │   │   ├── gpio.h
-│   │   │   ├── heap.h
-│   │   │   ├── stm32f1.h
-│   │   │   ├── systick.h
-│   │   │   └── uart.h
-│   │   ├── linker
-│   │   │   └── memory.ld
-│   │   ├── Makefile
-│   │   ├── README.md
-│   │   ├── report
-│   │   │   └── target-validation.md
-│   │   ├── src
-│   │   │   ├── gpio.c
-│   │   │   ├── heap.c
-│   │   │   ├── main.c
-│   │   │   ├── runtime.c
-│   │   │   ├── systick.c
-│   │   │   └── uart.c
-│   │   └── startup
-│   │       └── startup.c
-│   └── README.md
-├── LICENSE
-├── linker
-│   └── memory.ld
-├── Makefile
-├── README.md
-├── src
+|
+├── src/
 │   ├── command_parser.c
 │   ├── gpio.c
 │   ├── heap.c
@@ -3008,9 +2860,93 @@ Người học được xem là hoàn thành chủ đề khi có thể:
 │   ├── stack_monitor.c
 │   ├── systick.c
 │   └── uart.c
-├── startup
-│   └── startup.c
-└── VALIDATION.md
+|
+├── labs/
+│   ├── 01-memory-layout/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── startup/
+│   │   ├── linker/
+│   │   ├── include/
+│   │   └── src/
+|   |
+│   ├── 02-startup-sections/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── startup/
+│   │   ├── linker/
+│   │   ├── include/
+│   │   └── src/
+|   |
+│   ├── 03-stack-high-water/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── include/
+│   │   ├── src/
+│   │   └── tests/
+|   |
+│   ├── 04-static-memory-budget/
+│   │   ├── memory-budget.md
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   └── src/
+|   |
+│   ├── 05-first-fit-basic/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── include/
+│   │   ├── src/
+│   │   └── tests/
+|   |
+│   ├── 06-block-splitting/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── include/
+│   │   ├── src/
+│   │   └── tests/
+|   |
+│   ├── 07-block-coalescing/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── include/
+│   │   ├── src/
+│   │   └── tests/
+|   |
+│   ├── 08-invalid-free/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── include/
+│   │   ├── src/
+│   │   └── tests/
+|   |
+│   ├── 09-fragmentation/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── tests/
+│   │   ├── include/
+│   │   ├── src/
+│   │   └── report/
+|   |
+│   ├── 10-target-demo/
+│   │   ├── README.md
+│   │   ├── Makefile
+│   │   ├── startup/
+│   │   ├── linker/
+│   │   ├── include/
+│   │   ├── src/
+│   │   └── report/
+|   |
+│   └── README.md
+|
+├── docs/
+│   ├── allocation-models.md
+│   ├── allocator-design.md
+│   ├── memory-map.md
+│   ├── rtos-introduction.md
+│   └── startup-flow.md
+|
+└── build/
+
 ```
 
 ---
