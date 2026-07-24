@@ -49,9 +49,7 @@
 33. [Bài thực hành](#33-bài-thực-hành)
 34. [Project tổng kết chủ đề](#34-project-tổng-kết-chủ-đề)
 35. [Cấu trúc repository đề xuất](#35-cấu-trúc-repository-đề-xuất)
-36. [Quy tắc Makefile](#36-quy-tắc-makefile)
 37. [Liên hệ với roadmap HairRTOS](#37-liên-hệ-với-roadmap-hairtos)
-38. [Nội dung chưa thuộc chủ đề này](#38-nội-dung-chưa-thuộc-chủ-đề-này)
 39. [Tiêu chí hoàn thành](#39-tiêu-chí-hoàn-thành)
 40. [Tổng kết](#40-tổng-kết)
 
@@ -2483,7 +2481,7 @@ Mỗi lab phải có:
 
 ---
 
-## Lab 01 — Cortex-M3 exception and stack inspection
+## Bài 01 — Cortex-M3 exception and stack inspection
 
 ### Mục tiêu
 
@@ -2523,11 +2521,11 @@ Stacked xPSR:
 
 ### Tiêu chí hoàn thành
 
-- [ ] Xác định đúng mode.
-- [ ] Xác định hardware frame.
-- [ ] Giải thích MSP/PSP.
-- [ ] Có ảnh hoặc log GDB.
-- [ ] Không sửa stack frame ngoài chủ đích.
+- Xác định đúng mode.
+- Xác định hardware frame.
+- Giải thích MSP/PSP.
+- Có ảnh hoặc log GDB.
+- Không sửa stack frame ngoài chủ đích.
 
 ---
 
@@ -2571,11 +2569,11 @@ Có thể test trên Ubuntu trước khi dùng target.
 
 ### Tiêu chí hoàn thành
 
-- [ ] ASan pass.
-- [ ] UBSan pass.
-- [ ] Frame layout được vẽ.
-- [ ] `saved_sp` nằm trong stack.
-- [ ] Có static assertion cho assumptions.
+- ASan pass.
+- UBSan pass.
+- Frame layout được vẽ.
+- `saved_sp` nằm trong stack.
+- Có static assertion cho assumptions.
 
 ---
 
@@ -2623,11 +2621,11 @@ argument->magic == EXPECTED_MAGIC
 
 ### Tiêu chí hoàn thành
 
-- [ ] Task chạy trên PSP.
-- [ ] Handler chạy trên MSP.
-- [ ] Argument đúng.
-- [ ] `hr_kernel_start()` không return.
-- [ ] GDB xác nhận PSP nằm trong task stack.
+- Task chạy trên PSP.
+- Handler chạy trên MSP.
+- Argument đúng.
+- `hr_kernel_start()` không return.
+- GDB xác nhận PSP nằm trong task stack.
 
 ---
 
@@ -2669,11 +2667,11 @@ static void task_a(void *argument)
 
 ### Tiêu chí hoàn thành
 
-- [ ] Local counter đúng.
-- [ ] Không stack overlap.
-- [ ] Không HardFault.
-- [ ] Save/restore đối xứng.
-- [ ] PendSV không gọi driver.
+- Local counter đúng.
+- Không stack overlap.
+- Không HardFault.
+- Save/restore đối xứng.
+- PendSV không gọi driver.
 
 ---
 
@@ -2714,12 +2712,12 @@ double insertion
 
 ### Tiêu chí hoàn thành
 
-- [ ] GCC hoặc Clang host build.
-- [ ] `-Wall -Wextra -Werror`.
-- [ ] ASan pass.
-- [ ] UBSan pass.
-- [ ] Không include STM32 header.
-- [ ] Policy test độc lập PendSV.
+- GCC hoặc Clang host build.
+- `-Wall -Wextra -Werror`.
+- ASan pass.
+- UBSan pass.
+- Không include STM32 header.
+- Policy test độc lập PendSV.
 
 ---
 
@@ -2749,11 +2747,11 @@ Vì chưa có blocking đầy đủ, lab có thể dùng release flag hoặc coo
 
 ### Tiêu chí hoàn thành
 
-- [ ] Priority ordering đúng.
-- [ ] Trace đúng expected sequence.
-- [ ] Ready bitmap đúng.
-- [ ] Scheduler không thao tác register.
-- [ ] PendSV không chứa policy phức tạp.
+- Priority ordering đúng.
+- Trace đúng expected sequence.
+- Ready bitmap đúng.
+- Scheduler không thao tác register.
+- PendSV không chứa policy phức tạp.
 
 ---
 
@@ -2786,10 +2784,10 @@ Dùng SysTick để:
 
 ### Tiêu chí hoàn thành
 
-- [ ] Tick frequency được xác nhận.
-- [ ] PendSV thấp hơn SysTick.
-- [ ] Time slice rotation đúng.
-- [ ] Không UART trong SysTick.
+- Tick frequency được xác nhận.
+- PendSV thấp hơn SysTick.
+- Time slice rotation đúng.
+- Không UART trong SysTick.
 
 ---
 
@@ -2830,10 +2828,10 @@ Task High chạy
 
 ### Tiêu chí hoàn thành
 
-- [ ] High chạy trước Low tiếp tục.
-- [ ] ISR không gọi blocking API.
-- [ ] PendSV chỉ chạy sau ISR.
-- [ ] Trace chứng minh deferred preemption.
+- High chạy trước Low tiếp tục.
+- ISR không gọi blocking API.
+- PendSV chỉ chạy sau ISR.
+- Trace chứng minh deferred preemption.
 
 ---
 
@@ -2869,10 +2867,10 @@ Không yêu cầu hoàn toàn bằng nhau tại mọi thời điểm.
 
 ### Tiêu chí hoàn thành
 
-- [ ] FIFO đúng.
-- [ ] Task không bị bỏ quên.
-- [ ] Lower priority không chen khi priority 2 còn READY.
-- [ ] Rotation chỉ xảy ra khi cần.
+- FIFO đúng.
+- Task không bị bỏ quên.
+- Lower priority không chen khi priority 2 còn READY.
+- Rotation chỉ xảy ra khi cần.
 
 ---
 
@@ -2915,11 +2913,11 @@ Scheduler invariant status:
 
 ### Tiêu chí hoàn thành
 
-- [ ] Stress run pass.
-- [ ] Không corruption.
-- [ ] Không guard failure.
-- [ ] Scheduler invariant pass.
-- [ ] Có report target validation.
+- Stress run pass.
+- Không corruption.
+- Không guard failure.
+- Scheduler invariant pass.
+- Có report target validation.
 
 ---
 
@@ -3293,96 +3291,7 @@ Với mục tiêu học theo từng checkpoint và lưu lại trạng thái impl
 
 ---
 
-# 36. Quy tắc Makefile
-
-Theo cách tổ chức đã thống nhất:
-
-## 36.1 Root Makefile
-
-Root `Makefile` chỉ chứa rule liên quan project tổng kết:
-
-```bash
-make
-make rebuild
-make clean
-make size
-make sections
-make symbols
-make symbols-size
-make disasm
-make flash-stlink
-make flash-openocd
-make erase
-```
-
-Không chứa:
-
-```text
-lab01
-lab02
-...
-all-labs
-host-labs
-run-labs
-```
-
-## 36.2 Lab Makefile
-
-Mỗi lab chỉ chứa rule của chính lab đó.
-
-Lab host:
-
-```bash
-make
-make test
-make run
-make clean
-```
-
-Lab target:
-
-```bash
-make
-make rebuild
-make clean
-make size
-make sections
-make disasm
-make flash-stlink
-make flash-openocd
-make erase
-```
-
-## 36.3 Build output
-
-Root:
-
-```text
-build/
-```
-
-Mỗi lab:
-
-```text
-labs/<lab-name>/build/
-```
-
-Build artifact không commit Git.
-
-## 36.4 Không gọi Makefile lab từ root
-
-Người học chủ động:
-
-```bash
-cd labs/04-cooperative-pendsv
-make
-```
-
-Điều này làm ranh giới lab rõ ràng và tránh Makefile gốc trở thành bộ điều phối toàn repository.
-
----
-
-# 37. Liên hệ với roadmap HairRTOS
+# 36. Liên hệ với roadmap HairRTOS
 
 Chủ đề 2 liên quan trực tiếp các phase sau.
 
@@ -3455,131 +3364,89 @@ Bao phủ:
 
 ---
 
-# 38. Nội dung chưa thuộc chủ đề này
-
-Không nên đưa quá nhiều tính năng vào project này.
-
-## Chưa cần queue
-
-```text
-Producer -> Queue -> Consumer
-```
-
-Thuộc chủ đề communication.
-
-## Chưa cần semaphore và mutex
-
-- semaphore;
-- mutual exclusion;
-- ownership;
-- priority inheritance.
-
-Thuộc chủ đề synchronization.
-
-## Chưa cần software timer service
-
-SysTick ở đây là kernel tick, không phải callback timer framework.
-
-## Chưa cần event framework
-
-- Active Object;
-- state machine dispatch;
-- publish/subscribe;
-- dynamic event pool.
-
-## Chưa cần allocator trong context switch
-
-Context switch không được gọi first-fit allocator.
-
-## Chưa cần benchmark hoàn chỉnh
-
-Có thể đếm switch và quan sát GPIO. Benchmark latency chính thức thuộc chủ đề communication/timer/benchmark sau này.
-
----
-
-# 39. Tiêu chí hoàn thành
+# 37. Tiêu chí hoàn thành
 
 ## Scheduling theory
 
-- [ ] Giải thích scheduler là gì.
-- [ ] Phân biệt scheduling decision và context switch.
-- [ ] Phân biệt cooperative và preemptive.
-- [ ] Giải thích fixed-priority policy.
-- [ ] Giải thích round-robin.
-- [ ] Giải thích starvation.
-- [ ] Giải thích idle task.
+- Giải thích scheduler là gì.
+- Phân biệt scheduling decision và context switch.
+- Phân biệt cooperative và preemptive.
+- Giải thích fixed-priority policy.
+- Giải thích round-robin.
+- Giải thích starvation.
+- Giải thích idle task.
 
 ## Cortex-M3 architecture
 
-- [ ] Phân biệt Thread mode và Handler mode.
-- [ ] Phân biệt MSP và PSP.
-- [ ] Liệt kê hardware-saved registers.
-- [ ] Liệt kê software-saved registers.
-- [ ] Giải thích exception entry.
-- [ ] Giải thích exception return.
-- [ ] Giải thích `EXC_RETURN`.
-- [ ] Giải thích Thumb bit.
-- [ ] Giải thích stack alignment.
+- Phân biệt Thread mode và Handler mode.
+- Phân biệt MSP và PSP.
+- Liệt kê hardware-saved registers.
+- Liệt kê software-saved registers.
+- Giải thích exception entry.
+- Giải thích exception return.
+- Giải thích `EXC_RETURN`.
+- Giải thích Thumb bit.
+- Giải thích stack alignment.
 
 ## Initial task
 
-- [ ] Build initial frame.
-- [ ] R0 chứa argument.
-- [ ] PC trỏ task entry.
-- [ ] LR trỏ task-return handler.
-- [ ] xPSR Thumb bit được set.
-- [ ] saved stack pointer đúng range.
-- [ ] Host tests pass.
+- Build initial frame.
+- R0 chứa argument.
+- PC trỏ task entry.
+- LR trỏ task-return handler.
+- xPSR Thumb bit được set.
+- saved stack pointer đúng range.
+- Host tests pass.
 
 ## SVC
 
-- [ ] Start task đầu tiên bằng SVC.
-- [ ] Task chạy bằng PSP.
-- [ ] Handler chạy bằng MSP.
-- [ ] Kernel start không return.
-- [ ] GDB xác nhận đúng.
+- Start task đầu tiên bằng SVC.
+- Task chạy bằng PSP.
+- Handler chạy bằng MSP.
+- Kernel start không return.
+- GDB xác nhận đúng.
 
 ## PendSV
 
-- [ ] PendSV priority thấp.
-- [ ] Save R4-R11.
-- [ ] Store current PSP vào TCB.
-- [ ] Select next TCB.
-- [ ] Restore R4-R11.
-- [ ] Write next PSP.
-- [ ] Preserve EXC_RETURN.
-- [ ] Không gọi driver hoặc allocator.
+- PendSV priority thấp.
+- Save R4-R11.
+- Store current PSP vào TCB.
+- Select next TCB.
+- Restore R4-R11.
+- Write next PSP.
+- Preserve EXC_RETURN.
+- Không gọi driver hoặc allocator.
 
 ## Scheduler
 
-- [ ] Ready queues per priority.
-- [ ] Ready bitmap.
-- [ ] Highest-priority selection.
-- [ ] FIFO among equals.
-- [ ] Round-robin.
-- [ ] Idle task always ready.
-- [ ] Invariants được assert.
-- [ ] Host tests pass với sanitizer.
+- Ready queues per priority.
+- Ready bitmap.
+- Highest-priority selection.
+- FIFO among equals.
+- Round-robin.
+- Idle task always ready.
+- Invariants được assert.
+- Host tests pass với sanitizer.
 
 ## SysTick and preemption
 
-- [ ] Kernel tick hoạt động.
-- [ ] Time slice hoạt động.
-- [ ] SysTick chỉ request PendSV.
-- [ ] Higher task preempts lower.
-- [ ] ISR preemption được deferred.
-- [ ] Equal-priority tasks không starvation.
+- Kernel tick hoạt động.
+- Time slice hoạt động.
+- SysTick chỉ request PendSV.
+- Higher task preempts lower.
+- ISR preemption được deferred.
+- Equal-priority tasks không starvation.
 
 ## Validation
 
-- [ ] Local variables giữ đúng.
-- [ ] Stress test pass.
-- [ ] Stack guard pass.
-- [ ] Không HardFault.
-- [ ] Có UART/GDB evidence.
-- [ ] Có target validation report.
-- [ ] Root Makefile chỉ quản lý final project.
-- [ ] Mỗi lab có Makefile riêng.
+- Local variables giữ đúng.
+- Stress test pass.
+- Stack guard pass.
+- Không HardFault.
+- Có UART/GDB evidence.
+- Có target validation report.
+- Root Makefile chỉ quản lý final project.
+- Mỗi lab có Makefile riêng.
 
 ---
 
