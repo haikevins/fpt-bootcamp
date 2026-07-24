@@ -3521,15 +3521,3 @@ Phase 6 — Fixed-priority scheduler
 Phase 7 — SysTick, delay and timeout base
 Phase 8 — Preemption and round-robin
 ```
-
-Các đoạn code trong README là mã khung đào tạo. Chúng cần được kiểm tra lại với:
-
-- ABI của compiler;
-- linker script;
-- vector table;
-- STM32F103 interrupt priority configuration;
-- disassembly;
-- GDB;
-- target hardware validation;
-
-trước khi dùng làm kernel hoàn chỉnh.
